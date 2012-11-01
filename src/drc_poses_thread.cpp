@@ -1126,7 +1126,7 @@ void drc_poses_thread::create_poses()
 
     q_right_arm[0]=60.0*DEG2RAD;
     q_right_arm[1]=-10.0*DEG2RAD;
-    q_right_arm[2]=20.0*DEG2RAD;
+    q_right_arm[2]=-20.0*DEG2RAD; //20
     q_right_arm[3]=-110.0*DEG2RAD;
     q_right_arm[4]=0.0*DEG2RAD;
     q_right_arm[5]=-30.0*DEG2RAD;
@@ -1134,7 +1134,7 @@ void drc_poses_thread::create_poses()
 
     q_left_arm[0]=60.0*DEG2RAD;
     q_left_arm[1]=10.0*DEG2RAD;
-    q_left_arm[2]=-20.0*DEG2RAD;
+    q_left_arm[2]=20.0*DEG2RAD; //-20
     q_left_arm[3]=-110.0*DEG2RAD;
     q_left_arm[4]=0.0*DEG2RAD;
     q_left_arm[5]=-30.0*DEG2RAD;
@@ -1165,46 +1165,143 @@ void drc_poses_thread::create_poses()
 
     poses["grasp_homing"] = q;
     
-    //---------------------- reach ---------------------
-
+    //---------------------- fall_homing ---------------------
     q_right_arm.zero();
     q_left_arm.zero();
     q_torso.zero();
     q_right_leg.zero();
     q_left_leg.zero();
     q_head.zero();
-    q_in.zero();
-    
-    
-    q_in=joint_sense();
-    robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+
 
     q_right_arm[0]=60.0*DEG2RAD;
     q_right_arm[1]=-10.0*DEG2RAD;
-    q_right_arm[2]=20.0*DEG2RAD;
+    q_right_arm[2]=-20.0*DEG2RAD;
     q_right_arm[3]=-110.0*DEG2RAD;
     q_right_arm[4]=0.0*DEG2RAD;
     q_right_arm[5]=-30.0*DEG2RAD;
     q_right_arm[6]=0.0*DEG2RAD;
 
-    q_left_arm[0]=23.0*DEG2RAD;
-    q_left_arm[1]=33.0*DEG2RAD;
-    q_left_arm[2]=-2.0*DEG2RAD;
-    q_left_arm[3]=-93.0*DEG2RAD;
-    q_left_arm[4]=-70.0*DEG2RAD;
-    q_left_arm[5]=14.0*DEG2RAD;
-    q_left_arm[6]=2.0*DEG2RAD;
-    
+    q_left_arm[0]=60.0*DEG2RAD;
+    q_left_arm[1]=10.0*DEG2RAD;
+    q_left_arm[2]=20.0*DEG2RAD;
+    q_left_arm[3]=-110.0*DEG2RAD;
+    q_left_arm[4]=0.0*DEG2RAD;
+    q_left_arm[5]=-30.0*DEG2RAD;
+    q_left_arm[6]=0.0*DEG2RAD;
+
     q_torso[0] = 0.0;
     q_torso[1] = 0.0;
     q_torso[2] = 0.0;
-    
-    q_head[0] = 30.0*DEG2RAD;
-    q_head[1] = 30.0*DEG2RAD;
+
+    q_right_leg[0]=2.2*DEG2RAD;
+    q_right_leg[1]=0.15*DEG2RAD;
+    q_right_leg[2]=-17.2*DEG2RAD;
+    q_right_leg[3]=33.2*DEG2RAD;
+    q_right_leg[4]=-16.0*DEG2RAD;
+    q_right_leg[5]=-2.25*DEG2RAD;
+
+    q_left_leg[0]=-2.2*DEG2RAD;
+    q_left_leg[1]=-0.15*DEG2RAD;
+    q_left_leg[2]=-17.2*DEG2RAD;
+    q_left_leg[3]=33.2*DEG2RAD;
+    q_left_leg[4]=-16.0*DEG2RAD;
+    q_left_leg[5]=2.25*DEG2RAD;
+
+    q_head[1] = 45.0*DEG2RAD; //down
 
     robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
-    poses["reach"] = q;
+    poses["fall_homing"] = q;
+    
+    
+    
+    // !!!!!! Dont use this pose -- legs are in super dangerous configuration - Przemek
+    // Use the one from YAML file instead
+    //---------------------- reach ---------------------
+
+//     q_right_arm.zero();
+//     q_left_arm.zero();
+//     q_torso.zero();
+//     q_right_leg.zero();
+//     q_left_leg.zero();
+//     q_head.zero();
+//     q_in.zero();
+//     
+//     
+//     q_in=joint_sense();
+//     robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+// 
+//     q_right_arm[0]=60.0*DEG2RAD;
+//     q_right_arm[1]=-10.0*DEG2RAD;
+//     q_right_arm[2]=20.0*DEG2RAD;
+//     q_right_arm[3]=-110.0*DEG2RAD;
+//     q_right_arm[4]=0.0*DEG2RAD;
+//     q_right_arm[5]=-30.0*DEG2RAD;
+//     q_right_arm[6]=0.0*DEG2RAD;
+// 
+//     q_left_arm[0]=23.0*DEG2RAD;
+//     q_left_arm[1]=33.0*DEG2RAD;
+//     q_left_arm[2]=-2.0*DEG2RAD;
+//     q_left_arm[3]=-93.0*DEG2RAD;
+//     q_left_arm[4]=-70.0*DEG2RAD;
+//     q_left_arm[5]=14.0*DEG2RAD;
+//     q_left_arm[6]=2.0*DEG2RAD;
+//     
+//     q_torso[0] = 0.0;
+//     q_torso[1] = 0.0;
+//     q_torso[2] = 0.0;
+//     
+//     q_head[0] = 30.0*DEG2RAD;
+//     q_head[1] = 30.0*DEG2RAD;
+// 
+//     robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+// 
+//     poses["reach"] = q;
+    
+    // !!!!!! Dont use this pose -- legs are in super dangerous configuration - Przemek
+    // Use the one from YAML file instead
+    //---------------------- reach_right ---------------------
+
+//     q_right_arm.zero();
+//     q_left_arm.zero();
+//     q_torso.zero();
+//     q_right_leg.zero();
+//     q_left_leg.zero();
+//     q_head.zero();
+//     q_in.zero();
+//     
+//     
+//     q_in=joint_sense();
+//     robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+// 
+//     q_right_arm[0]=23.0*DEG2RAD;
+//     q_right_arm[1]=-33.0*DEG2RAD;
+//     q_right_arm[2]=-2.0*DEG2RAD;
+//     q_right_arm[3]=-93.0*DEG2RAD;
+//     q_right_arm[4]=70.0*DEG2RAD;
+//     q_right_arm[5]=14.0*DEG2RAD;
+//     q_right_arm[6]=2.0*DEG2RAD;
+//     
+//     q_left_arm[0]=60.0*DEG2RAD;
+//     q_left_arm[1]=10.0*DEG2RAD;
+//     q_left_arm[2]=-20.0*DEG2RAD;
+//     q_left_arm[3]=-110.0*DEG2RAD;
+//     q_left_arm[4]=0.0*DEG2RAD;
+//     q_left_arm[5]=-30.0*DEG2RAD;
+//     q_left_arm[6]=0.0*DEG2RAD;
+//     
+//     q_torso[0] = 0.0;
+//     q_torso[1] = 0.0;
+//     q_torso[2] = 0.0;
+//     
+//     q_head[0] = -30.0*DEG2RAD;
+//     q_head[1] = 30.0*DEG2RAD;
+// 
+//     robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+// 
+//     poses["reach_right"] = q;
     
     //---------------------- walk ---------------------
 
@@ -1670,190 +1767,190 @@ void drc_poses_thread::create_poses()
 
     poses["demo8"] = q;
     
-    //---------------------- demo9 ---------------------
-    q_right_arm.zero();
-    q_left_arm.zero();
-    q_torso.zero();
-    q_right_leg.zero();
-    q_left_leg.zero();
-    q_head.zero();
-    
-    q_right_arm[0]=0.3;
-    q_right_arm[1]=-0.15;
-    q_right_arm[2]=0.0;
-    q_right_arm[3]=-0.6;
-    q_right_arm[4]=0.0;
-    q_right_arm[5]=0.0;
-    q_right_arm[6]=0.0;
-    
-    q_left_arm[0]=0.3;
-    q_left_arm[1]=0.15;
-    q_left_arm[2]=0.0;
-    q_left_arm[3]=-0.6;
-    q_left_arm[4]=0.0;
-    q_left_arm[5]=0.0;
-    q_left_arm[6]=0.0;
-    
-    q_torso[0] = 0.0;
-    q_torso[1] = 0.0;
-    q_torso[2] = 0.0;
-    
-    q_right_leg[0]=0.0;
-    q_right_leg[1]=0.0;
-    q_right_leg[2]=-0.3;
-    q_right_leg[3]=0.6;
-    q_right_leg[4]=-0.3;
-    q_right_leg[5]=-0.0;
-    
-    q_left_leg[0]=-0.0;
-    q_left_leg[1]=0.0;
-    q_left_leg[2]=-0.3;
-    q_left_leg[3]=0.6;
-    q_left_leg[4]=-0.3;
-    q_left_leg[5]=0.0;
-
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
-
-    poses["demo9"] = q;    
-    
-    //---------------------- demo10 ---------------------
-    q_right_arm.zero();
-    q_left_arm.zero();
-    q_torso.zero();
-    q_right_leg.zero();
-    q_left_leg.zero();
-    q_head.zero();
-    
-    q_right_arm[0]=0.0;
-    q_right_arm[1]=-1.3;
-    q_right_arm[2]=0.25;
-    q_right_arm[3]=0.0;
-    q_right_arm[4]=0.0;
-    q_right_arm[5]=0.0;
-    q_right_arm[6]=0.0;
-    
-    q_left_arm[0]=0.0;
-    q_left_arm[1]=1.3;
-    q_left_arm[2]=-0.25;
-    q_left_arm[3]=0.0;
-    q_left_arm[4]=0.0;
-    q_left_arm[5]=0.0;
-    q_left_arm[6]=0.0;
-    
-    q_torso[0] = 0.0;
-    q_torso[1] = -0.25;
-    q_torso[2] = 0.0;
-    
-    q_right_leg[0]=0.0;
-    q_right_leg[1]=0.0;
-    q_right_leg[2]=-0.3;
-    q_right_leg[3]=0.6;
-    q_right_leg[4]=-0.3;
-    q_right_leg[5]=-0.0;
-    
-    q_left_leg[0]=-0.0;
-    q_left_leg[1]=0.0;
-    q_left_leg[2]=-0.3;
-    q_left_leg[3]=0.6;
-    q_left_leg[4]=-0.3;
-    q_left_leg[5]=0.0;
-
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
-
-    poses["demo10"] = q;    
-    
-    //---------------------- demo11 ---------------------
-    q_right_arm.zero();
-    q_left_arm.zero();
-    q_torso.zero();
-    q_right_leg.zero();
-    q_left_leg.zero();
-    q_head.zero();
-    
-    q_right_arm[0]=0.0;
-    q_right_arm[1]=-1.3;
-    q_right_arm[2]=0.25;
-    q_right_arm[3]=-2.6;
-    q_right_arm[4]=0.0;
-    q_right_arm[5]=0.0;
-    q_right_arm[6]=0.0;
-    
-    q_left_arm[0]=0.0;
-    q_left_arm[1]=1.3;
-    q_left_arm[2]=-0.25;
-    q_left_arm[3]=-2.6;
-    q_left_arm[4]=0.0;
-    q_left_arm[5]=0.0;
-    q_left_arm[6]=0.0;
-    
-    q_torso[0] = 0.0;
-    q_torso[1] = -0.25;
-    q_torso[2] = 0.0;
-    
-    q_right_leg[0]=0.0;
-    q_right_leg[1]=0.0;
-    q_right_leg[2]=-0.3;
-    q_right_leg[3]=0.6;
-    q_right_leg[4]=-0.3;
-    q_right_leg[5]=-0.0;
-    
-    q_left_leg[0]=-0.0;
-    q_left_leg[1]=0.0;
-    q_left_leg[2]=-0.3;
-    q_left_leg[3]=0.6;
-    q_left_leg[4]=-0.3;
-    q_left_leg[5]=0.0;
-
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
-
-    poses["demo11"] = q;   
-    
-    //---------------------- demo12 ---------------------
-    q_right_arm.zero();
-    q_left_arm.zero();
-    q_torso.zero();
-    q_right_leg.zero();
-    q_left_leg.zero();
-    q_head.zero();
-    
-    q_right_arm[0]=0.0;
-    q_right_arm[1]=-1.3;
-    q_right_arm[2]=0.0;
-    q_right_arm[3]=0.4;
-    q_right_arm[4]=0.0;
-    q_right_arm[5]=0.0;
-    q_right_arm[6]=0.0;
-    
-    q_left_arm[0]=0.0;
-    q_left_arm[1]=1.3;
-    q_left_arm[2]=0.0;
-    q_left_arm[3]=0.4;
-    q_left_arm[4]=0.0;
-    q_left_arm[5]=0.0;
-    q_left_arm[6]=0.0;
-    
-    q_torso[0] = 0.0;
-    q_torso[1] = -0.25;
-    q_torso[2] = 0.0;
-    
-    q_right_leg[0]=0.0;
-    q_right_leg[1]=0.0;
-    q_right_leg[2]=-0.3;
-    q_right_leg[3]=0.6;
-    q_right_leg[4]=-0.3;
-    q_right_leg[5]=-0.0;
-    
-    q_left_leg[0]=-0.0;
-    q_left_leg[1]=0.0;
-    q_left_leg[2]=-0.3;
-    q_left_leg[3]=0.6;
-    q_left_leg[4]=-0.3;
-    q_left_leg[5]=0.0;
-
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
-
-    poses["demo12"] = q;   
-    
+//     //---------------------- demo9 ---------------------
+//     q_right_arm.zero();
+//     q_left_arm.zero();
+//     q_torso.zero();
+//     q_right_leg.zero();
+//     q_left_leg.zero();
+//     q_head.zero();
+//     
+//     q_right_arm[0]=0.3;
+//     q_right_arm[1]=-0.15;
+//     q_right_arm[2]=0.0;
+//     q_right_arm[3]=-0.6;
+//     q_right_arm[4]=0.0;
+//     q_right_arm[5]=0.0;
+//     q_right_arm[6]=0.0;
+//     
+//     q_left_arm[0]=0.3;
+//     q_left_arm[1]=0.15;
+//     q_left_arm[2]=0.0;
+//     q_left_arm[3]=-0.6;
+//     q_left_arm[4]=0.0;
+//     q_left_arm[5]=0.0;
+//     q_left_arm[6]=0.0;
+//     
+//     q_torso[0] = 0.0;
+//     q_torso[1] = 0.0;
+//     q_torso[2] = 0.0;
+//     
+//     q_right_leg[0]=0.0;
+//     q_right_leg[1]=0.0;
+//     q_right_leg[2]=-0.3;
+//     q_right_leg[3]=0.6;
+//     q_right_leg[4]=-0.3;
+//     q_right_leg[5]=-0.0;
+//     
+//     q_left_leg[0]=-0.0;
+//     q_left_leg[1]=0.0;
+//     q_left_leg[2]=-0.3;
+//     q_left_leg[3]=0.6;
+//     q_left_leg[4]=-0.3;
+//     q_left_leg[5]=0.0;
+// 
+//     robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+// 
+//     poses["demo9"] = q;    
+//     
+//     //---------------------- demo10 ---------------------
+//     q_right_arm.zero();
+//     q_left_arm.zero();
+//     q_torso.zero();
+//     q_right_leg.zero();
+//     q_left_leg.zero();
+//     q_head.zero();
+//     
+//     q_right_arm[0]=0.0;
+//     q_right_arm[1]=-1.3;
+//     q_right_arm[2]=0.25;
+//     q_right_arm[3]=0.0;
+//     q_right_arm[4]=0.0;
+//     q_right_arm[5]=0.0;
+//     q_right_arm[6]=0.0;
+//     
+//     q_left_arm[0]=0.0;
+//     q_left_arm[1]=1.3;
+//     q_left_arm[2]=-0.25;
+//     q_left_arm[3]=0.0;
+//     q_left_arm[4]=0.0;
+//     q_left_arm[5]=0.0;
+//     q_left_arm[6]=0.0;
+//     
+//     q_torso[0] = 0.0;
+//     q_torso[1] = -0.25;
+//     q_torso[2] = 0.0;
+//     
+//     q_right_leg[0]=0.0;
+//     q_right_leg[1]=0.0;
+//     q_right_leg[2]=-0.3;
+//     q_right_leg[3]=0.6;
+//     q_right_leg[4]=-0.3;
+//     q_right_leg[5]=-0.0;
+//     
+//     q_left_leg[0]=-0.0;
+//     q_left_leg[1]=0.0;
+//     q_left_leg[2]=-0.3;
+//     q_left_leg[3]=0.6;
+//     q_left_leg[4]=-0.3;
+//     q_left_leg[5]=0.0;
+// 
+//     robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+// 
+//     poses["demo10"] = q;    
+//     
+//     //---------------------- demo11 ---------------------
+//     q_right_arm.zero();
+//     q_left_arm.zero();
+//     q_torso.zero();
+//     q_right_leg.zero();
+//     q_left_leg.zero();
+//     q_head.zero();
+//     
+//     q_right_arm[0]=0.0;
+//     q_right_arm[1]=-1.3;
+//     q_right_arm[2]=0.25;
+//     q_right_arm[3]=-2.6;
+//     q_right_arm[4]=0.0;
+//     q_right_arm[5]=0.0;
+//     q_right_arm[6]=0.0;
+//     
+//     q_left_arm[0]=0.0;
+//     q_left_arm[1]=1.3;
+//     q_left_arm[2]=-0.25;
+//     q_left_arm[3]=-2.6;
+//     q_left_arm[4]=0.0;
+//     q_left_arm[5]=0.0;
+//     q_left_arm[6]=0.0;
+//     
+//     q_torso[0] = 0.0;
+//     q_torso[1] = -0.25;
+//     q_torso[2] = 0.0;
+//     
+//     q_right_leg[0]=0.0;
+//     q_right_leg[1]=0.0;
+//     q_right_leg[2]=-0.3;
+//     q_right_leg[3]=0.6;
+//     q_right_leg[4]=-0.3;
+//     q_right_leg[5]=-0.0;
+//     
+//     q_left_leg[0]=-0.0;
+//     q_left_leg[1]=0.0;
+//     q_left_leg[2]=-0.3;
+//     q_left_leg[3]=0.6;
+//     q_left_leg[4]=-0.3;
+//     q_left_leg[5]=0.0;
+// 
+//     robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+// 
+//     poses["demo11"] = q;   
+//     
+//     //---------------------- demo12 ---------------------
+//     q_right_arm.zero();
+//     q_left_arm.zero();
+//     q_torso.zero();
+//     q_right_leg.zero();
+//     q_left_leg.zero();
+//     q_head.zero();
+//     
+//     q_right_arm[0]=0.0;
+//     q_right_arm[1]=-1.3;
+//     q_right_arm[2]=0.0;
+//     q_right_arm[3]=0.4;
+//     q_right_arm[4]=0.0;
+//     q_right_arm[5]=0.0;
+//     q_right_arm[6]=0.0;
+//     
+//     q_left_arm[0]=0.0;
+//     q_left_arm[1]=1.3;
+//     q_left_arm[2]=0.0;
+//     q_left_arm[3]=0.4;
+//     q_left_arm[4]=0.0;
+//     q_left_arm[5]=0.0;
+//     q_left_arm[6]=0.0;
+//     
+//     q_torso[0] = 0.0;
+//     q_torso[1] = -0.25;
+//     q_torso[2] = 0.0;
+//     
+//     q_right_leg[0]=0.0;
+//     q_right_leg[1]=0.0;
+//     q_right_leg[2]=-0.3;
+//     q_right_leg[3]=0.6;
+//     q_right_leg[4]=-0.3;
+//     q_right_leg[5]=-0.0;
+//     
+//     q_left_leg[0]=-0.0;
+//     q_left_leg[1]=0.0;
+//     q_left_leg[2]=-0.3;
+//     q_left_leg[3]=0.6;
+//     q_left_leg[4]=-0.3;
+//     q_left_leg[5]=0.0;
+// 
+//     robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+// 
+//     poses["demo12"] = q;   
+//     
     //---------------------- demo13 ---------------------
     q_right_arm.zero();
     q_left_arm.zero();
