@@ -54,6 +54,9 @@ include(YarpInstallationHelpers)
 file(GLOB urdf poses.yaml)
 yarp_install(FILES ${urdf} DESTINATION ${CMAKE_BINARY_DIR})
 
+set(BUILD_PATH "${CMAKE_CURRENT_BINARY_DIR}") 
+configure_file(paths.h.in paths.h @ONLY)
+
 # add include directories
 INCLUDE_DIRECTORIES(include 
                     ${EIGEN3_INCLUDE_DIR}
@@ -61,6 +64,7 @@ INCLUDE_DIRECTORIES(include
 		    ${idynutils_INCLUDE_DIRS}
 		    ${GYM_INCLUDE_DIRS}
 		    ${trajectory_generator_INCLUDE_DIRS}
+		    ${CMAKE_CURRENT_BINARY_DIR} #added to be able to access paths.h
 		    )
 		    
 ADD_EXECUTABLE(${PROJECT_NAME} src/drc_poses_main.cpp 

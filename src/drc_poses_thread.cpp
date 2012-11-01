@@ -1,7 +1,22 @@
+/* Copyright [2014,2015] [Alessandro Settimi, Luca Muratore]
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.*/
+
 #include <yarp/os/all.h>
 
 #include "drc_poses_thread.h"
 #include "drc_poses_constants.h"
+#include "paths.h"
 
 #include <iostream>
 #include <fstream>
@@ -50,7 +65,9 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     left_leg_joints = 6;
     head_joints = 2;
   
-    loadPoses("/home/walkman/walkman/build/drc/drc_poses/poses.yaml");
+    std::string yamlPath = BUILD_PATH;
+    yamlPath += "/poses.yaml";
+    loadPoses(yamlPath);
     q_input.resize(kinematic_joints);
     delta_q.resize(kinematic_joints);
     q_output.resize(kinematic_joints);
@@ -338,7 +355,9 @@ void drc_poses_thread::run()
 	    }
 	    else if (cmd=="reloadYAML") {
             cout << "Reloading YAML poses file " << endl;
-            loadPoses("/home/walkman/walkman/build/drc/drc_poses/poses.yaml");
+            std::string yamlPath = BUILD_PATH;
+            yamlPath += "/poses.yaml";
+            loadPoses(yamlPath);
             updateCommandList();
         } else if (cmd=="savePose") {
             static int poseCounter=0; 
@@ -348,8 +367,10 @@ void drc_poses_thread::run()
 
             tmp = robot.sensePosition(); //REAL_ROBOT
             for(int i=0;i<q_in.size();i++) q_in[i]=tmp[i];
+            std::string yamlPath = BUILD_PATH;
+            yamlPath += "/posesOut.yaml";
             
-            savePose(q_in, "/home/walkman/walkman/build/drc/drc_poses/posesOut.yaml", poseCounter);
+            savePose(q_in, yamlPath, poseCounter);
             poseCounter++;
         } else {
         err = (std::find(commands.begin(), commands.end(), cmd)!=commands.end())?"":"UNKWOWN";
@@ -2253,7 +2274,7 @@ bool drc_poses_thread::loadPoses(std::string yamlFilename)
   
   if (config["series"]) {
     const YAML::Node& poseSer = config["series"];
-    
+    allPoseSeries.clear();
 
     for (std::size_t i = 0; i < poseSer.size(); i++) {
         poseSeries tmpSeries;
