@@ -6,6 +6,8 @@
 #include "drc_poses_thread.h"
 #include "drc_poses_constants.h"
 
+using namespace walkman::drc::poses;
+
 /**
  * @brief drc_poses module derived from control_module
  * 

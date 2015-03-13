@@ -45,6 +45,7 @@ FIND_PACKAGE(iDynTree REQUIRED)
 FIND_PACKAGE(Eigen3 REQUIRED)
 FIND_PACKAGE(GYM REQUIRED)
 FIND_PACKAGE(paramHelp REQUIRED)
+FIND_PACKAGE(trajectory_generator REQUIRED)
 
 # add include directories
 INCLUDE_DIRECTORIES(include 
@@ -52,6 +53,7 @@ INCLUDE_DIRECTORIES(include
 		    ${YARP_INCLUDE_DIRS} 
 		    ${idynutils_INCLUDE_DIRS}
 		    ${GYM_INCLUDE_DIRS}
+		    ${trajectory_generator_INCLUDE_DIRS}
 		    )
 		    
 ADD_EXECUTABLE(${PROJECT_NAME} src/drc_poses_main.cpp 
@@ -62,6 +64,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${iDynTree_LIBRARIES}
                                       ${YARP_LIBRARIES}
 				      ${idynutils_LIBRARIES}
 				      ${GYM_LIBRARIES}
+				      ${trajectory_generator_LIBRARIES}
 				      )
 
 add_subdirectory(app)
