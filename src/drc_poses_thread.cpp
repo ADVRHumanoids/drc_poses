@@ -436,4 +436,50 @@ void drc_poses_thread::create_poses()
     robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["squat"] = q;
+    
+    //---------------------- debris ---------------------
+    q_right_arm.zero();
+    q_left_arm.zero();
+    q_torso.zero();
+    q_right_leg.zero();
+    q_left_leg.zero();
+    q_head.zero();
+    
+    q_right_arm[0]=1.05;
+    q_right_arm[1]=-0.15;
+    q_right_arm[2]=0.0;
+    q_right_arm[3]=-2.35;
+    q_right_arm[4]=0.0;
+    q_right_arm[5]=0.0;
+    q_right_arm[6]=0.0;
+    
+    q_left_arm[0]=1.05;
+    q_left_arm[1]=0.15;
+    q_left_arm[2]=0.0;
+    q_left_arm[3]=-2.35;
+    q_left_arm[4]=0.0;
+    q_left_arm[5]=0.0;
+    q_left_arm[6]=0.0;
+    
+    q_torso[0] = 0.0;
+    q_torso[1] = 0.0;
+    q_torso[2] = 0.0;
+    
+    q_right_leg[0]=0.0;
+    q_right_leg[1]=0.0;
+    q_right_leg[2]=-1.17;
+    q_right_leg[3]=2.34;
+    q_right_leg[4]=-1.17;
+    q_right_leg[5]=-0.0;
+    
+    q_left_leg[0]=-0.0;
+    q_left_leg[1]=0.0;
+    q_left_leg[2]=-1.17;
+    q_left_leg[3]=2.34;
+    q_left_leg[4]=-1.17;
+    q_left_leg[5]=0.0;
+
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+
+    poses["debris"] = q;
 }
