@@ -98,7 +98,7 @@ void drc_poses_thread::run()
 	}
     }
 
-    std::cout<<"Final Time = "<<final_time<<std::endl;
+    //std::cout<<"Final Time = "<<final_time<<std::endl;
     compute_delta_q();
 
     q_output = q_initial + delta_q;
