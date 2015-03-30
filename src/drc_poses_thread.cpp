@@ -6,6 +6,9 @@
 using namespace walkman::drc::poses;
 using namespace yarp::math;
 
+#define Max_Vel         0.3 // maximum joint velocity [rad/s]
+#define Min_Texe        3.0 // minimum execution time for homing [sec]
+
 drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::ResourceFinder rf, std::shared_ptr< paramHelp::ParamHelperServer > ph)
 :control_thread( module_prefix, rf, ph ), cmd_interface(module_prefix), status_interface(module_prefix)
 {
@@ -16,8 +19,8 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     create_poses();
     for(auto item:poses) commands.push_back(item.first);
 
-    next_time=0;
-    final_time=3.0;
+    next_time=0.0;
+    final_time=Min_Texe;   //devel_JLee
 }
 
 bool drc_poses_thread::custom_init()
@@ -72,6 +75,20 @@ void drc_poses_thread::run()
 		    q_initial = q_input;
 		    q_desired = poses.at(cmd);
 		    status_interface.setStatus( cmd, status_seq_num++ );
+
+            yarp::sig::Vector q_disp;
+            double q_max_disp, _max, _min;
+            double tmp_fin_time;
+            q_disp = q_desired - q_initial;
+            _max = findMax( q_disp );
+            _min = findMin( q_disp );
+            //considering negative values
+            if ( fabs( _max ) > fabs( _min ) ) {q_max_disp = fabs( _max);}
+            else {q_max_disp = fabs( _min );}
+            tmp_fin_time = q_max_disp/Max_Vel;
+
+            if ( Min_Texe < tmp_fin_time) {final_time = tmp_fin_time;}
+            else {final_time = Min_Texe;}
 		}
 		if(err=="UNKWOWN")
 		{
@@ -81,6 +98,7 @@ void drc_poses_thread::run()
 	}
     }
 
+    std::cout<<"Final Time = "<<final_time<<std::endl;
     compute_delta_q();
 
     q_output = q_initial + delta_q;
