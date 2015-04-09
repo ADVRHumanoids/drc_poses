@@ -9,6 +9,9 @@ using namespace yarp::math;
 #define Max_Vel         0.3 // maximum joint velocity [rad/s]
 #define Min_Texe        3.0 // minimum execution time for homing [sec]
 
+#define RAD2DEG    (180.0/M_PI)
+#define DEG2RAD    (M_PI/180.0)
+
 drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::ResourceFinder rf, std::shared_ptr< paramHelp::ParamHelperServer > ph)
 :control_thread( module_prefix, rf, ph ), cmd_interface(module_prefix), status_interface(module_prefix)
 {
@@ -500,4 +503,96 @@ void drc_poses_thread::create_poses()
     robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["debris"] = q;
+
+        //---------------------- driving ---------------------
+    q_right_arm.zero();
+    q_left_arm.zero();
+    q_torso.zero();
+    q_right_leg.zero();
+    q_left_leg.zero();
+    q_head.zero();
+    
+    q_right_arm[0]=-13.8*DEG2RAD;
+    q_right_arm[1]=-44.4*DEG2RAD;
+    q_right_arm[2]=31.4*DEG2RAD;
+    q_right_arm[3]=-107.2*DEG2RAD;
+    q_right_arm[4]=-90*DEG2RAD;
+    q_right_arm[5]=0.1*DEG2RAD;
+    q_right_arm[6]=-0.3*DEG2RAD;
+    
+    q_left_arm[0]=-35.0*DEG2RAD;
+    q_left_arm[1]=42.9*DEG2RAD;
+    q_left_arm[2]=49.0*DEG2RAD;
+    q_left_arm[3]=-134.0*DEG2RAD;
+    q_left_arm[4]=25.0*DEG2RAD;
+    q_left_arm[5]=0.0;
+    q_left_arm[6]=0.0;
+    
+    q_torso[0] = 0.0;
+    q_torso[1] = -2.6*DEG2RAD;
+    q_torso[2] = 0.0;
+    
+    q_right_leg[0]=-0.5*DEG2RAD;
+    q_right_leg[1]=0.0;
+    q_right_leg[2]=-90.0*DEG2RAD;
+    q_right_leg[3]=88.0*DEG2RAD;
+    q_right_leg[4]=-2.5*DEG2RAD;
+    q_right_leg[5]=-0.16*DEG2RAD;
+    
+    q_left_leg[0]=-0.5*DEG2RAD;
+    q_left_leg[1]=0.0;
+    q_left_leg[2]=-90*DEG2RAD;
+    q_left_leg[3]=88.0*DEG2RAD;
+    q_left_leg[4]=-2.5*DEG2RAD;
+    q_left_leg[5]=0.16*DEG2RAD;
+
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+
+    poses["driving"] = q;
+
+        //---------------------- car_exit---------------------
+    q_right_arm.zero();
+    q_left_arm.zero();
+    q_torso.zero();
+    q_right_leg.zero();
+    q_left_leg.zero();
+    q_head.zero();
+    
+    q_right_arm[0]=-34.9*DEG2RAD;
+    q_right_arm[1]=-38.1*DEG2RAD;
+    q_right_arm[2]=-55.2*DEG2RAD;
+    q_right_arm[3]=-165.2*DEG2RAD;
+    q_right_arm[4]=76.1*DEG2RAD;
+    q_right_arm[5]=5.8*DEG2RAD;
+    q_right_arm[6]=-1.83*DEG2RAD;
+    
+    q_left_arm[0]=-82.4*DEG2RAD;
+    q_left_arm[1]=34.4*DEG2RAD;
+    q_left_arm[2]=15.1*DEG2RAD;
+    q_left_arm[3]=-104.1*DEG2RAD;
+    q_left_arm[4]=25.0*DEG2RAD;
+    q_left_arm[5]=0.3*DEG2RAD;
+    q_left_arm[6]=0.1*DEG2RAD;
+    
+    q_torso[0] = 0.7*DEG2RAD;
+    q_torso[1] = -2.0*DEG2RAD;
+    q_torso[2] = 0.3*DEG2RAD;
+    
+    q_right_leg[0]=-1.2*DEG2RAD;
+    q_right_leg[1]=-0.5*DEG2RAD;
+    q_right_leg[2]=-89.1*DEG2RAD;
+    q_right_leg[3]=88.0*DEG2RAD;
+    q_right_leg[4]=-2.5*DEG2RAD;
+    q_right_leg[5]=-0.15*DEG2RAD;
+    
+    q_left_leg[0]=18.5*DEG2RAD;
+    q_left_leg[1]=20.7*DEG2RAD;
+    q_left_leg[2]=-25.5*DEG2RAD;
+    q_left_leg[3]=41.2*DEG2RAD;
+    q_left_leg[4]=-3.5*DEG2RAD;
+    q_left_leg[5]=0.1*DEG2RAD;
+
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+
+    poses["car_exit"] = q;
 }
