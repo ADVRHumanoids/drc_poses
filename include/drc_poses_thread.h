@@ -40,6 +40,8 @@ private:
     double initialized_time,next_time,final_time;
     std::map<std::string,yarp::sig::Vector> poses;
     yarp::sig::Vector q_desired;
+    std::string last_command;
+    bool demo_mode=false;
 
     bool action_completed();
     void create_poses();
