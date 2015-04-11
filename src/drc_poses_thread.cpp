@@ -791,7 +791,7 @@ void drc_poses_thread::create_poses()
     
     q_torso[0] = 0.0;
     q_torso[1] = 0.0;
-    q_torso[2] = 1.0;
+    q_torso[2] = 0.6;
     
     q_right_leg[0]=0.0;
     q_right_leg[1]=0.0;
@@ -837,7 +837,7 @@ void drc_poses_thread::create_poses()
     
     q_torso[0] = 0.0;
     q_torso[1] = 0.0;
-    q_torso[2] = -1.0;
+    q_torso[2] = -0.6;
     
     q_right_leg[0]=0.0;
     q_right_leg[1]=0.0;
