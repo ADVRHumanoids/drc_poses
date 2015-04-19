@@ -542,39 +542,39 @@ void drc_poses_thread::create_poses()
     q_left_leg.zero();
     q_head.zero();
     
-    q_right_arm[0]=-13.8*DEG2RAD;
-    q_right_arm[1]=-44.4*DEG2RAD;
-    q_right_arm[2]=31.4*DEG2RAD;
-    q_right_arm[3]=-107.2*DEG2RAD;
+    q_right_arm[0]=-19.77*DEG2RAD;
+    q_right_arm[1]=-43.47*DEG2RAD;
+    q_right_arm[2]=8.83*DEG2RAD;
+    q_right_arm[3]=-106.6*DEG2RAD;
     q_right_arm[4]=-90*DEG2RAD;
-    q_right_arm[5]=0.1*DEG2RAD;
-    q_right_arm[6]=-0.3*DEG2RAD;
+    q_right_arm[5]=0.3*DEG2RAD;
+    q_right_arm[6]=-0.33*DEG2RAD;
     
-    q_left_arm[0]=-35.0*DEG2RAD;
-    q_left_arm[1]=42.9*DEG2RAD;
-    q_left_arm[2]=49.0*DEG2RAD;
-    q_left_arm[3]=-134.0*DEG2RAD;
-    q_left_arm[4]=25.0*DEG2RAD;
-    q_left_arm[5]=0.0;
-    q_left_arm[6]=0.0;
+    q_left_arm[0]=45.56*DEG2RAD;
+    q_left_arm[1]=59.47*DEG2RAD;
+    q_left_arm[2]=-4.83*DEG2RAD;
+    q_left_arm[3]=-84-94*DEG2RAD;
+    q_left_arm[4]=117.14*DEG2RAD;
+    q_left_arm[5]=-73.82;
+    q_left_arm[6]=-46.0;
     
-    q_torso[0] = 0.0;
-    q_torso[1] = -2.6*DEG2RAD;
+    q_torso[0] = -1.0;
+    q_torso[1] = -1.84*DEG2RAD;
     q_torso[2] = 0.0;
     
-    q_right_leg[0]=-0.5*DEG2RAD;
-    q_right_leg[1]=0.0;
-    q_right_leg[2]=-90.0*DEG2RAD;
-    q_right_leg[3]=88.0*DEG2RAD;
-    q_right_leg[4]=-2.5*DEG2RAD;
-    q_right_leg[5]=-0.16*DEG2RAD;
+    q_right_leg[0]=-5.5*DEG2RAD;
+    q_right_leg[1]=-11.27;
+    q_right_leg[2]=-90.1*DEG2RAD;
+    q_right_leg[3]=90.27*DEG2RAD;
+    q_right_leg[4]=2.5*DEG2RAD;
+    q_right_leg[5]=4.54*DEG2RAD;
     
-    q_left_leg[0]=-0.5*DEG2RAD;
-    q_left_leg[1]=0.0;
-    q_left_leg[2]=-90*DEG2RAD;
-    q_left_leg[3]=88.0*DEG2RAD;
-    q_left_leg[4]=-2.5*DEG2RAD;
-    q_left_leg[5]=0.16*DEG2RAD;
+    q_left_leg[0]=9.82*DEG2RAD;
+    q_left_leg[1]=7.27;
+    q_left_leg[2]=-91.5*DEG2RAD;
+    q_left_leg[3]=89.8*DEG2RAD;
+    q_left_leg[4]=-0.62*DEG2RAD;
+    q_left_leg[5]=-0.17*DEG2RAD;
 
     robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
@@ -625,6 +625,52 @@ void drc_poses_thread::create_poses()
     robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["car_exit"] = q;
+
+    //---------------------- car_exit_mod---------------------
+    q_right_arm.zero();
+    q_left_arm.zero();
+    q_torso.zero();
+    q_right_leg.zero();
+    q_left_leg.zero();
+    q_head.zero();
+    
+    q_right_arm[0]=37.04*DEG2RAD;
+    q_right_arm[1]=-131.3*DEG2RAD;
+    q_right_arm[2]=-129.1*DEG2RAD;
+    q_right_arm[3]=-136.65*DEG2RAD;
+    q_right_arm[4]=-106.65*DEG2RAD;
+    q_right_arm[5]=4.17*DEG2RAD;
+    q_right_arm[6]=-1.83*DEG2RAD;
+    
+    q_left_arm[0]=-92.18*DEG2RAD;
+    q_left_arm[1]=92.34*DEG2RAD;
+    q_left_arm[2]=-26.35*DEG2RAD;
+    q_left_arm[3]=-126.2*DEG2RAD;
+    q_left_arm[4]=49.82*DEG2RAD;
+    q_left_arm[5]=1.15*DEG2RAD;
+    q_left_arm[6]=0.55*DEG2RAD;
+    
+    q_torso[0] = 1.8*DEG2RAD;
+    q_torso[1] = -2.1*DEG2RAD;
+    q_torso[2] = -0.58*DEG2RAD;
+    
+    q_right_leg[0]=-0.94*DEG2RAD;
+    q_right_leg[1]=0.02*DEG2RAD;
+    q_right_leg[2]=-89*DEG2RAD;
+    q_right_leg[3]=87.4*DEG2RAD;
+    q_right_leg[4]=-2.5*DEG2RAD;
+    q_right_leg[5]=-0.11*DEG2RAD;
+    
+    q_left_leg[0]=17.44*DEG2RAD;
+    q_left_leg[1]=20.7*DEG2RAD;
+    q_left_leg[2]=-25.0*DEG2RAD;
+    q_left_leg[3]=41.2*DEG2RAD;
+    q_left_leg[4]=-3.8*DEG2RAD;
+    q_left_leg[5]=0.05*DEG2RAD;
+
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+
+    poses["car_exit_mod"] = q;
 
     //------------------ POSES FOR DEMO ----------------
     //---------------------- demo0 ---------------------
