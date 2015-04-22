@@ -5,6 +5,7 @@
 #include <GYM/yarp_command_interface.hpp>
 #include <GYM/yarp_status_interface.h>
 #include <trajectory_generator/trajectory_generator.h>
+#include "drc_shared/module_statuses/drc_poses_statuses.h"
 
 namespace walkman
 {
@@ -23,6 +24,7 @@ private:
     int cmd_seq_num=0;
     walkman::yarp_status_interface status_interface;
     int status_seq_num=0;
+    walkman::drc::poses::status_definitions status_definitions;
 
     bool busy=false;
 

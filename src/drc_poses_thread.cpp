@@ -54,7 +54,7 @@ void drc_poses_thread::run()
     if(action_completed()) 
     {
 	busy=false;
-	status_interface.setStatus( "ready", status_seq_num++ );
+	status_interface.setStatus( status_definitions.status_to_code.at("ready"), status_seq_num++ );
     }
 
     if(!busy)
@@ -107,7 +107,11 @@ void drc_poses_thread::run()
 		    initialized_time = yarp::os::Time::now();
 		    q_initial = q_input;
 		    q_desired = poses.at(cmd);
-		    status_interface.setStatus( cmd, status_seq_num++ );
+
+		    if(status_definitions.status_to_code.count(cmd))
+			status_interface.setStatus( status_definitions.status_to_code.at(cmd), status_seq_num++ );
+		    else
+			status_interface.setStatus( cmd, status_seq_num++ );
 
             yarp::sig::Vector q_disp;
             double q_max_disp, _max, _min;
