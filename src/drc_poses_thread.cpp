@@ -110,8 +110,6 @@ void drc_poses_thread::run()
 
 		    if(status_definitions.status_to_code.count(cmd))
 			status_interface.setStatus( status_definitions.status_to_code.at(cmd), status_seq_num++ );
-		    else
-			status_interface.setStatus( cmd, status_seq_num++ );
 
             yarp::sig::Vector q_disp;
             double q_max_disp, _max, _min;
