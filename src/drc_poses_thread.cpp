@@ -142,9 +142,20 @@ void drc_poses_thread::run()
 		    if(cmd=="recover") //We don't want to move the legs in this case
 		    {
 			yarp::sig::Vector q(robot.getNumberOfJoints());
+			yarp::sig::Vector q_in(robot.getNumberOfJoints());
+			yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
+			yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
+			yarp::sig::Vector q_torso(robot.torso.getNumberOfJoints());
+			yarp::sig::Vector q_right_leg(robot.right_leg.getNumberOfJoints());
+			yarp::sig::Vector q_left_leg(robot.left_leg.getNumberOfJoints());
+			yarp::sig::Vector q_head(robot.head.getNumberOfJoints());
 
-			recover_q_left_leg = robot.left_leg.sensePosition();
-			recover_q_right_leg = robot.right_leg.sensePosition();
+			q_in = robot.sensePosition();
+
+			robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+			recover_q_left_leg = q_left_leg;
+			recover_q_right_leg = q_right_leg;
 
 			robot.fromRobotToIdyn(recover_q_right_arm,recover_q_left_arm,recover_q_torso,recover_q_right_leg,recover_q_left_leg,recover_q_head,q);
 			poses["recover"] = q;
