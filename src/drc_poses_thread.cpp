@@ -143,8 +143,8 @@ void drc_poses_thread::run()
 		    {
 			yarp::sig::Vector q(robot.getNumberOfJoints());
 
-			recover_q_left_leg = robot.left_hand.sensePosition();
-			recover_q_right_leg = robot.left_leg.sensePosition();
+			recover_q_left_leg = robot.left_leg.sensePosition();
+			recover_q_right_leg = robot.right_leg.sensePosition();
 
 			robot.fromRobotToIdyn(recover_q_right_arm,recover_q_left_arm,recover_q_torso,recover_q_right_leg,recover_q_left_leg,recover_q_head,q);
 			poses["recover"] = q;
