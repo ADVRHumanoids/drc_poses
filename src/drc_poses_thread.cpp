@@ -34,18 +34,18 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     recover_q_left_leg.resize(robot.left_leg.getNumberOfJoints());
     recover_q_head.resize(robot.head.getNumberOfJoints());
     
-    recover_q_right_arm[0]=0.4;
+    recover_q_right_arm[0]=0.6;
     recover_q_right_arm[1]=-0.15;
     recover_q_right_arm[2]=0.0;
-    recover_q_right_arm[3]=-0.8;
+    recover_q_right_arm[3]=-1;
     recover_q_right_arm[4]=0.0;
     recover_q_right_arm[5]=0.0;
     recover_q_right_arm[6]=0.0;
     
-    recover_q_left_arm[0]=0.4;
+    recover_q_left_arm[0]=0.6;
     recover_q_left_arm[1]=0.15;
     recover_q_left_arm[2]=0.0;
-    recover_q_left_arm[3]=-0.8;
+    recover_q_left_arm[3]=-1;
     recover_q_left_arm[4]=0.0;
     recover_q_left_arm[5]=0.0;
     recover_q_left_arm[6]=0.0;
