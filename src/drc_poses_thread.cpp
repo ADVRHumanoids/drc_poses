@@ -24,6 +24,38 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
 
     next_time=0.0;
     final_time=Min_Texe;   //devel_JLee
+    
+        
+    //recover pose
+    recover_q_right_arm.resize(robot.right_arm.getNumberOfJoints());
+    recover_q_left_arm.resize(robot.left_arm.getNumberOfJoints());
+    recover_q_torso.resize(robot.torso.getNumberOfJoints());
+    recover_q_right_leg.resize(robot.right_leg.getNumberOfJoints());
+    recover_q_left_leg.resize(robot.left_leg.getNumberOfJoints());
+    recover_q_head.resize(robot.head.getNumberOfJoints());
+    
+    recover_q_right_arm[0]=0.6;
+    recover_q_right_arm[1]=-0.15;
+    recover_q_right_arm[2]=0.0;
+    recover_q_right_arm[3]=-1;
+    recover_q_right_arm[4]=0.0;
+    recover_q_right_arm[5]=0.0;
+    recover_q_right_arm[6]=0.0;
+    
+    recover_q_left_arm[0]=0.6;
+    recover_q_left_arm[1]=0.15;
+    recover_q_left_arm[2]=0.0;
+    recover_q_left_arm[3]=-1;
+    recover_q_left_arm[4]=0.0;
+    recover_q_left_arm[5]=0.0;
+    recover_q_left_arm[6]=0.0;
+    
+    recover_q_torso[0] = 0.0;
+    recover_q_torso[1] = 0.0;
+    recover_q_torso[2] = 0.0;
+    
+    recover_q_head[0]=0;
+    recover_q_head[1]=0; 
 }
 
 bool drc_poses_thread::custom_init()
@@ -106,6 +138,29 @@ void drc_poses_thread::run()
 		    busy=true;
 		    initialized_time = yarp::os::Time::now();
 		    q_initial = q_input;
+
+		    if(cmd=="recover") //We don't want to move the legs in this case
+		    {
+			yarp::sig::Vector q(robot.getNumberOfJoints());
+			yarp::sig::Vector q_in(robot.getNumberOfJoints());
+			yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
+			yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
+			yarp::sig::Vector q_torso(robot.torso.getNumberOfJoints());
+			yarp::sig::Vector q_right_leg(robot.right_leg.getNumberOfJoints());
+			yarp::sig::Vector q_left_leg(robot.left_leg.getNumberOfJoints());
+			yarp::sig::Vector q_head(robot.head.getNumberOfJoints());
+
+			q_in = robot.sensePosition();
+
+			robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+			recover_q_left_leg = q_left_leg;
+			recover_q_right_leg = q_right_leg;
+
+			robot.fromRobotToIdyn(recover_q_right_arm,recover_q_left_arm,recover_q_torso,recover_q_right_leg,recover_q_left_leg,recover_q_head,q);
+			poses["recover"] = q;
+		    }
+
 		    q_desired = poses.at(cmd);
 
 		    if(status_definitions.status_to_code.count(cmd))
@@ -190,6 +245,7 @@ void drc_poses_thread::create_poses()
 {
     
     yarp::sig::Vector q(robot.getNumberOfJoints());
+    poses["recover"] = q; //just to have it in the known commands
 
     yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
     yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
