@@ -234,6 +234,7 @@ void drc_poses_thread::create_poses()
 {
     
     yarp::sig::Vector q(robot.getNumberOfJoints());
+    poses["recover"] = q; //just to have it in the known commands
 
     yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
     yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
