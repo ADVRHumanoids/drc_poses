@@ -48,6 +48,13 @@ private:
     bool action_completed();
     void create_poses();
     void print_help();
+
+    yarp::sig::Vector recover_q_right_arm;
+    yarp::sig::Vector recover_q_left_arm;
+    yarp::sig::Vector recover_q_torso;
+    yarp::sig::Vector recover_q_right_leg;
+    yarp::sig::Vector recover_q_left_leg;
+    yarp::sig::Vector recover_q_head;
 public:
     
     /**
