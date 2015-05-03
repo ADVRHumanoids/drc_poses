@@ -634,7 +634,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[1]=6*DEG2RAD;
     q_left_leg[2]=-92.5*DEG2RAD;
     q_left_leg[3]=93*DEG2RAD;
-    q_left_leg[4]=1.5*DEG2RAD;
+    q_left_leg[4]=-30*DEG2RAD;
     q_left_leg[5]=-0.5*DEG2RAD;
 
     robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
