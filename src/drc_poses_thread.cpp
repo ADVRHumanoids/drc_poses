@@ -1038,7 +1038,7 @@ void drc_poses_thread::create_poses()
     q_torso[1] = 0.0;
     q_torso[2] = 0.0;
 
-    q_head[0] = 1.0;
+    q_head[0] = 0.5;
 //     q_head[1] = 0.3;
 
     q_right_leg[0]=0.0;
@@ -1087,7 +1087,7 @@ void drc_poses_thread::create_poses()
     q_torso[1] = 0.0;
     q_torso[2] = 0.0;
     
-    q_head[0] = -1.0;
+    q_head[0] = -0.5;
 //     q_head[1] = -0.3;
     
     q_right_leg[0]=0.0;
@@ -1397,7 +1397,7 @@ void drc_poses_thread::create_poses()
     
     q_right_arm[0]=0.0;
     q_right_arm[1]=-0.15;
-    q_right_arm[2]=-0.25;
+    q_right_arm[2]=-0.35;
     q_right_arm[3]=-1.5;
     q_right_arm[4]=2.4;
     q_right_arm[5]=-1.3;
@@ -1405,7 +1405,7 @@ void drc_poses_thread::create_poses()
     
     q_left_arm[0]=0.0;
     q_left_arm[1]=0.15;
-    q_left_arm[2]=0.25;
+    q_left_arm[2]=0.35;
     q_left_arm[3]=-1.5;
     q_left_arm[4]=-2.4;
     q_left_arm[5]=-1.3;
