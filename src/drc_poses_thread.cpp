@@ -59,14 +59,14 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     drive_q_head.resize(robot.head.getNumberOfJoints());
     
     drive_q_left_arm[0]=-10*DEG2RAD;
-    drive_q_left_arm[1]=60*DEG2RAD;
-    drive_q_left_arm[2]=30*DEG2RAD;
-    drive_q_left_arm[3]=-100*DEG2RAD;
+    drive_q_left_arm[1]=45*DEG2RAD;
+    drive_q_left_arm[2]=0*DEG2RAD;
+    drive_q_left_arm[3]=-80*DEG2RAD;
     drive_q_left_arm[4]=40*DEG2RAD;
     drive_q_left_arm[5]=-20*DEG2RAD;
     drive_q_left_arm[6]=0*DEG2RAD;
     
-    drive_q_torso[0]=-14*DEG2RAD;
+    drive_q_torso[0]=0*DEG2RAD;
     drive_q_torso[1]=-7*DEG2RAD;
     drive_q_torso[2]=45*DEG2RAD;
 }
