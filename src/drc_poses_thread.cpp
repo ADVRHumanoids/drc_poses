@@ -49,13 +49,26 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     recover_q_left_arm[4]=0.0;
     recover_q_left_arm[5]=0.0;
     recover_q_left_arm[6]=0.0;
+
+    //driving pose
+    drive_q_right_arm.resize(robot.right_arm.getNumberOfJoints());
+    drive_q_left_arm.resize(robot.left_arm.getNumberOfJoints());
+    drive_q_torso.resize(robot.torso.getNumberOfJoints());
+    drive_q_right_leg.resize(robot.right_leg.getNumberOfJoints());
+    drive_q_left_leg.resize(robot.left_leg.getNumberOfJoints());
+    drive_q_head.resize(robot.head.getNumberOfJoints());
     
-    recover_q_torso[0] = 0.0;
-    recover_q_torso[1] = 0.0;
-    recover_q_torso[2] = 0.0;
+    drive_q_left_arm[0]=-10*DEG2RAD;
+    drive_q_left_arm[1]=60*DEG2RAD;
+    drive_q_left_arm[2]=30*DEG2RAD;
+    drive_q_left_arm[3]=-100*DEG2RAD;
+    drive_q_left_arm[4]=40*DEG2RAD;
+    drive_q_left_arm[5]=-20*DEG2RAD;
+    drive_q_left_arm[6]=0*DEG2RAD;
     
-    recover_q_head[0]=0;
-    recover_q_head[1]=0; 
+    drive_q_torso[0]=-14*DEG2RAD;
+    drive_q_torso[1]=-7*DEG2RAD;
+    drive_q_torso[2]=45*DEG2RAD;
 }
 
 bool drc_poses_thread::custom_init()
@@ -156,9 +169,35 @@ void drc_poses_thread::run()
 
 			recover_q_left_leg = q_left_leg;
 			recover_q_right_leg = q_right_leg;
+			recover_q_torso = q_torso;
+			recover_q_head = q_head;
 
 			robot.fromRobotToIdyn(recover_q_right_arm,recover_q_left_arm,recover_q_torso,recover_q_right_leg,recover_q_left_leg,recover_q_head,q);
 			poses["recover"] = q;
+		    }
+		    
+		    if(cmd=="driving") //We don't want to move the legs in this case
+		    {
+			yarp::sig::Vector q(robot.getNumberOfJoints());
+			yarp::sig::Vector q_in(robot.getNumberOfJoints());
+			yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
+			yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
+			yarp::sig::Vector q_torso(robot.torso.getNumberOfJoints());
+			yarp::sig::Vector q_right_leg(robot.right_leg.getNumberOfJoints());
+			yarp::sig::Vector q_left_leg(robot.left_leg.getNumberOfJoints());
+			yarp::sig::Vector q_head(robot.head.getNumberOfJoints());
+
+			q_in = robot.sensePosition();
+
+			robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+			drive_q_left_leg = q_left_leg;
+			drive_q_right_leg = q_right_leg;
+			drive_q_head = q_head;
+			drive_q_right_arm = q_right_arm;
+
+			robot.fromRobotToIdyn(drive_q_right_arm,drive_q_left_arm,drive_q_torso,drive_q_right_leg,drive_q_left_leg,drive_q_head,q);
+			poses["driving"] = q;
 		    }
 
 		    q_desired = poses.at(cmd);
@@ -246,6 +285,7 @@ void drc_poses_thread::create_poses()
     
     yarp::sig::Vector q(robot.getNumberOfJoints());
     poses["recover"] = q; //just to have it in the known commands
+    poses["driving"] = q; //just to have it in the known commands
 
     yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
     yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
@@ -593,53 +633,53 @@ void drc_poses_thread::create_poses()
     poses["debris"] = q;
 
         //---------------------- driving ---------------------
-    q_right_arm.zero();
-    q_left_arm.zero();
-    q_torso.zero();
-    q_right_leg.zero();
-    q_left_leg.zero();
-    q_head.zero();
-    
-    q_right_arm[0]=-19.77*DEG2RAD;
-    q_right_arm[1]=-43.47*DEG2RAD;
-    q_right_arm[2]=8.83*DEG2RAD;
-    q_right_arm[3]=-106.6*DEG2RAD;
-    q_right_arm[4]=-90*DEG2RAD;
-    q_right_arm[5]=0.3*DEG2RAD;
-    q_right_arm[6]=-0.33*DEG2RAD;
-    
-    q_left_arm[0]=44*DEG2RAD;
-    q_left_arm[1]=40.2*DEG2RAD;
-    q_left_arm[2]=-0.5*DEG2RAD;
-    q_left_arm[3]=-114.5*DEG2RAD;
-    q_left_arm[4]=42*DEG2RAD;
-    q_left_arm[5]=-65*DEG2RAD;
-    q_left_arm[6]=1*DEG2RAD;
-    
-    q_torso[0] = 0.0*DEG2RAD;
-    q_torso[1] = 0.0*DEG2RAD;
-    q_torso[2] = 13.0*DEG2RAD;
-    
-    q_head[0] = 30.0*DEG2RAD;
-    q_head[1] = 20.0*DEG2RAD;
-    
-    q_right_leg[0]=-6*DEG2RAD;
-    q_right_leg[1]=-11*DEG2RAD;
-    q_right_leg[2]=-91*DEG2RAD;
-    q_right_leg[3]=89*DEG2RAD;
-    q_right_leg[4]=4.5*DEG2RAD;
-    q_right_leg[5]=4.0*DEG2RAD;
-    
-    q_left_leg[0]=0*DEG2RAD;
-    q_left_leg[1]=6*DEG2RAD;
-    q_left_leg[2]=-92.5*DEG2RAD;
-    q_left_leg[3]=93*DEG2RAD;
-    q_left_leg[4]=-30*DEG2RAD;
-    q_left_leg[5]=-0.5*DEG2RAD;
-
-    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
-
-    poses["driving"] = q;
+//     q_right_arm.zero();
+//     q_left_arm.zero();
+//     q_torso.zero();
+//     q_right_leg.zero();
+//     q_left_leg.zero();
+//     q_head.zero();
+//     
+//     q_right_arm[0]=-19.77*DEG2RAD;
+//     q_right_arm[1]=-43.47*DEG2RAD;
+//     q_right_arm[2]=8.83*DEG2RAD;
+//     q_right_arm[3]=-106.6*DEG2RAD;
+//     q_right_arm[4]=-90*DEG2RAD;
+//     q_right_arm[5]=0.3*DEG2RAD;
+//     q_right_arm[6]=-0.33*DEG2RAD;
+//     
+//     q_left_arm[0]=44*DEG2RAD;
+//     q_left_arm[1]=40.2*DEG2RAD;
+//     q_left_arm[2]=-0.5*DEG2RAD;
+//     q_left_arm[3]=-114.5*DEG2RAD;
+//     q_left_arm[4]=42*DEG2RAD;
+//     q_left_arm[5]=-65*DEG2RAD;
+//     q_left_arm[6]=1*DEG2RAD;
+//     
+//     q_torso[0] = 0.0*DEG2RAD;
+//     q_torso[1] = 0.0*DEG2RAD;
+//     q_torso[2] = 13.0*DEG2RAD;
+//     
+//     q_head[0] = 30.0*DEG2RAD;
+//     q_head[1] = 20.0*DEG2RAD;
+//     
+//     q_right_leg[0]=-6*DEG2RAD;
+//     q_right_leg[1]=-11*DEG2RAD;
+//     q_right_leg[2]=-91*DEG2RAD;
+//     q_right_leg[3]=89*DEG2RAD;
+//     q_right_leg[4]=4.5*DEG2RAD;
+//     q_right_leg[5]=4.0*DEG2RAD;
+//     
+//     q_left_leg[0]=0*DEG2RAD;
+//     q_left_leg[1]=6*DEG2RAD;
+//     q_left_leg[2]=-92.5*DEG2RAD;
+//     q_left_leg[3]=93*DEG2RAD;
+//     q_left_leg[4]=-30*DEG2RAD;
+//     q_left_leg[5]=-0.5*DEG2RAD;
+// 
+//     robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+// 
+//     poses["driving"] = q;
 
         //---------------------- car_exit---------------------
     q_right_arm.zero();
