@@ -632,54 +632,54 @@ void drc_poses_thread::create_poses()
 
     poses["debris"] = q;
 
-        //---------------------- driving ---------------------
-//     q_right_arm.zero();
-//     q_left_arm.zero();
-//     q_torso.zero();
-//     q_right_leg.zero();
-//     q_left_leg.zero();
-//     q_head.zero();
-//     
-//     q_right_arm[0]=-19.77*DEG2RAD;
-//     q_right_arm[1]=-43.47*DEG2RAD;
-//     q_right_arm[2]=8.83*DEG2RAD;
-//     q_right_arm[3]=-106.6*DEG2RAD;
-//     q_right_arm[4]=-90*DEG2RAD;
-//     q_right_arm[5]=0.3*DEG2RAD;
-//     q_right_arm[6]=-0.33*DEG2RAD;
-//     
-//     q_left_arm[0]=44*DEG2RAD;
-//     q_left_arm[1]=40.2*DEG2RAD;
-//     q_left_arm[2]=-0.5*DEG2RAD;
-//     q_left_arm[3]=-114.5*DEG2RAD;
-//     q_left_arm[4]=42*DEG2RAD;
-//     q_left_arm[5]=-65*DEG2RAD;
-//     q_left_arm[6]=1*DEG2RAD;
-//     
-//     q_torso[0] = 0.0*DEG2RAD;
-//     q_torso[1] = 0.0*DEG2RAD;
-//     q_torso[2] = 13.0*DEG2RAD;
-//     
-//     q_head[0] = 30.0*DEG2RAD;
-//     q_head[1] = 20.0*DEG2RAD;
-//     
-//     q_right_leg[0]=-6*DEG2RAD;
-//     q_right_leg[1]=-11*DEG2RAD;
-//     q_right_leg[2]=-91*DEG2RAD;
-//     q_right_leg[3]=89*DEG2RAD;
-//     q_right_leg[4]=4.5*DEG2RAD;
-//     q_right_leg[5]=4.0*DEG2RAD;
-//     
-//     q_left_leg[0]=0*DEG2RAD;
-//     q_left_leg[1]=6*DEG2RAD;
-//     q_left_leg[2]=-92.5*DEG2RAD;
-//     q_left_leg[3]=93*DEG2RAD;
-//     q_left_leg[4]=-30*DEG2RAD;
-//     q_left_leg[5]=-0.5*DEG2RAD;
-// 
-//     robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
-// 
-//     poses["driving"] = q;
+        //---------------------- driving_pose ---------------------
+    q_right_arm.zero();
+    q_left_arm.zero();
+    q_torso.zero();
+    q_right_leg.zero();
+    q_left_leg.zero();
+    q_head.zero();
+    
+    q_right_arm[0]=-19.77*DEG2RAD;
+    q_right_arm[1]=-43.47*DEG2RAD;
+    q_right_arm[2]=8.83*DEG2RAD;
+    q_right_arm[3]=-106.6*DEG2RAD;
+    q_right_arm[4]=-90*DEG2RAD;
+    q_right_arm[5]=0.3*DEG2RAD;
+    q_right_arm[6]=-0.33*DEG2RAD;
+    
+    q_left_arm[0]=44*DEG2RAD;
+    q_left_arm[1]=40.2*DEG2RAD;
+    q_left_arm[2]=-0.5*DEG2RAD;
+    q_left_arm[3]=-114.5*DEG2RAD;
+    q_left_arm[4]=42*DEG2RAD;
+    q_left_arm[5]=-65*DEG2RAD;
+    q_left_arm[6]=1*DEG2RAD;
+    
+    q_torso[0] = 0.0*DEG2RAD;
+    q_torso[1] = 0.0*DEG2RAD;
+    q_torso[2] = 13.0*DEG2RAD;
+    
+    q_head[0] = 30.0*DEG2RAD;
+    q_head[1] = 20.0*DEG2RAD;
+    
+    q_right_leg[0]=-6*DEG2RAD;
+    q_right_leg[1]=-11*DEG2RAD;
+    q_right_leg[2]=-91*DEG2RAD;
+    q_right_leg[3]=89*DEG2RAD;
+    q_right_leg[4]=4.5*DEG2RAD;
+    q_right_leg[5]=4.0*DEG2RAD;
+    
+    q_left_leg[0]=0*DEG2RAD;
+    q_left_leg[1]=6*DEG2RAD;
+    q_left_leg[2]=-92.5*DEG2RAD;
+    q_left_leg[3]=93*DEG2RAD;
+    q_left_leg[4]=-30*DEG2RAD;
+    q_left_leg[5]=-0.5*DEG2RAD;
+
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+
+    poses["driving_pose"] = q;
 
         //---------------------- car_exit---------------------
     q_right_arm.zero();
