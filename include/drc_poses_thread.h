@@ -62,6 +62,8 @@ private:
     yarp::sig::Vector drive_q_right_leg;
     yarp::sig::Vector drive_q_left_leg;
     yarp::sig::Vector drive_q_head;
+    
+    std::fstream fs1;
 public:
     
     /**

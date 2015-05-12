@@ -69,6 +69,8 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     drive_q_torso[0]=0*DEG2RAD;
     drive_q_torso[1]=-7*DEG2RAD;
     drive_q_torso[2]=45*DEG2RAD;
+    
+    fs1.open ("poses_debug_jnt.m", std::fstream::out);
 }
 
 bool drc_poses_thread::custom_init()
@@ -233,6 +235,15 @@ void drc_poses_thread::run()
     q_output = q_initial + delta_q;
 
     robot.move(q_output);
+    
+    yarp::sig::Vector q_torso(3), q_left_arm(7), q_left_arm_real(7), q_right_arm(7), q_left_leg(6), q_right_leg(6), q_head(2);
+    robot.fromIdynToRobot(q_output, q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head);
+    yarp::sig::Vector real_q = robot.left_arm.sensePosition();
+    
+    static int i=1;
+    fs1<<"Jnt_real("<<i<<",:)=["<<q_left_arm[0]<<' '<<q_left_arm[1]<<' '<<q_left_arm[2]<<' '<<q_left_arm[3]<<' '<<q_left_arm[4]<<' '<<q_left_arm[5]<<' '<<q_left_arm[6]<<"];\n";
+    q_left_arm = real_q;
+    fs1<<"Jnt_SoT("<<i++<<",:)=["<<q_left_arm[0]<<' '<<q_left_arm[1]<<' '<<q_left_arm[2]<<' '<<q_left_arm[3]<<' '<<q_left_arm[4]<<' '<<q_left_arm[5]<<' '<<q_left_arm[6]<<"];\n";
 }
 
 yarp::sig::Vector drc_poses_thread::compute_delta_q()
