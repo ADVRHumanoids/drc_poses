@@ -72,7 +72,6 @@ private:
     yarp::sig::Vector pre_homing_q_left_hand;
     yarp::sig::Vector pre_homing_q_right_hand;
     
-    std::fstream fs1;
 public:
     
     /**
