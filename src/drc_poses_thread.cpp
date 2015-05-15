@@ -266,6 +266,8 @@ void drc_poses_thread::run()
 			pre_homing_q_right_leg = q_right_leg;
 
 			robot.fromRobotToIdyn(pre_homing_q_right_arm,pre_homing_q_left_arm,pre_homing_q_torso,pre_homing_q_right_leg,pre_homing_q_left_leg,pre_homing_q_head,q);
+            robot.left_hand.move(pre_homing_q_left_hand);
+            robot.right_hand.move(pre_homing_q_right_hand);
 			poses["pre_homing"] = q;
 		    }
 		    
