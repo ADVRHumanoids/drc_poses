@@ -398,19 +398,19 @@ void drc_poses_thread::create_poses()
     q_torso[1] = 0.0;
     q_torso[2] = 0.0;
     
-    q_right_leg[0]=0.0;
-    q_right_leg[1]=0.0;
-    q_right_leg[2]=-0.25;
-    q_right_leg[3]=0.5;
-    q_right_leg[4]=-0.25;
-    q_right_leg[5]=-0.0;
+    q_right_leg[0]=-2.2*DEG2RAD;
+    q_right_leg[1]=-0.15*DEG2RAD;
+    q_right_leg[2]=-17.2*DEG2RAD;
+    q_right_leg[3]=33.2*DEG2RAD;
+    q_right_leg[4]=-16.0*DEG2RAD;
+    q_right_leg[5]=2.25*DEG2RAD;
     
-    q_left_leg[0]=-0.0;
-    q_left_leg[1]=0.0;
-    q_left_leg[2]=-0.25;
-    q_left_leg[3]=0.5;
-    q_left_leg[4]=-0.25;
-    q_left_leg[5]=0.0;
+    q_left_leg[0]=2.2*DEG2RAD;
+    q_left_leg[1]=0.15*DEG2RAD;
+    q_left_leg[2]=-17.2*DEG2RAD;
+    q_left_leg[3]=33.2*DEG2RAD;
+    q_left_leg[4]=-16.0*DEG2RAD;
+    q_left_leg[5]=-2.25*DEG2RAD;
 
     robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
