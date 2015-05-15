@@ -6,8 +6,8 @@
 using namespace walkman::drc::poses;
 using namespace yarp::math;
 
-#define Max_Vel         0.3 // maximum joint velocity [rad/s]
-#define Min_Texe        3.0 // minimum execution time for homing [sec]
+#define Max_Vel         0.5 // maximum joint velocity [rad/s]
+#define Min_Texe        2.0 // minimum execution time for homing [sec]
 
 #define RAD2DEG    (180.0/M_PI)
 #define DEG2RAD    (M_PI/180.0)
@@ -111,7 +111,7 @@ void drc_poses_thread::run()
 	{
 	    if(demo_mode)
 	    {
-	        if(last_command=="demo") cmd="demo0";
+	        if(last_command=="demo") cmd="demo2";
 		if(last_command=="demo0") cmd="demo1";
 		if(last_command=="demo1") cmd="demo2";
 		if(last_command=="demo2") cmd="demo3";
@@ -1171,7 +1171,7 @@ void drc_poses_thread::create_poses()
     q_head.zero();
     
     q_right_arm[0]=0.0;
-    q_right_arm[1]=-1.6;
+    q_right_arm[1]=-1.3;
     q_right_arm[2]=0.25;
     q_right_arm[3]=0.0;
     q_right_arm[4]=0.0;
@@ -1179,7 +1179,7 @@ void drc_poses_thread::create_poses()
     q_right_arm[6]=0.0;
     
     q_left_arm[0]=0.0;
-    q_left_arm[1]=1.6;
+    q_left_arm[1]=1.3;
     q_left_arm[2]=-0.25;
     q_left_arm[3]=0.0;
     q_left_arm[4]=0.0;
@@ -1217,7 +1217,7 @@ void drc_poses_thread::create_poses()
     q_head.zero();
     
     q_right_arm[0]=0.0;
-    q_right_arm[1]=-1.6;
+    q_right_arm[1]=-1.3;
     q_right_arm[2]=0.25;
     q_right_arm[3]=-2.6;
     q_right_arm[4]=0.0;
@@ -1225,7 +1225,7 @@ void drc_poses_thread::create_poses()
     q_right_arm[6]=0.0;
     
     q_left_arm[0]=0.0;
-    q_left_arm[1]=1.6;
+    q_left_arm[1]=1.3;
     q_left_arm[2]=-0.25;
     q_left_arm[3]=-2.6;
     q_left_arm[4]=0.0;
@@ -1263,7 +1263,7 @@ void drc_poses_thread::create_poses()
     q_head.zero();
     
     q_right_arm[0]=0.0;
-    q_right_arm[1]=-1.6;
+    q_right_arm[1]=-1.3;
     q_right_arm[2]=0.0;
     q_right_arm[3]=0.4;
     q_right_arm[4]=0.0;
@@ -1271,7 +1271,7 @@ void drc_poses_thread::create_poses()
     q_right_arm[6]=0.0;
     
     q_left_arm[0]=0.0;
-    q_left_arm[1]=1.6;
+    q_left_arm[1]=1.3;
     q_left_arm[2]=0.0;
     q_left_arm[3]=0.4;
     q_left_arm[4]=0.0;
@@ -1373,6 +1373,8 @@ void drc_poses_thread::create_poses()
     q_torso[0] = 0.0;
     q_torso[1] = -0.25;
     q_torso[2] = 0.0;
+
+    q_head[1] = 0.5;
     
     q_right_leg[0]=0.0;
     q_right_leg[1]=0.0;
@@ -1419,6 +1421,8 @@ void drc_poses_thread::create_poses()
     q_torso[0] = 0.0;
     q_torso[1] = -0.25;
     q_torso[2] = 0.0;
+
+    q_head[1] = 0.5;
     
     q_right_leg[0]=0.0;
     q_right_leg[1]=0.0;
