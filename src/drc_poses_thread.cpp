@@ -119,9 +119,15 @@ bool drc_poses_thread::custom_init()
     status_interface.start();
     status_interface.setStatus( "ready", status_seq_num++ );
 
-    q_input=robot.sensePosition();
+    q_input=robot.sensePositionRefFeedback();
     robot.idynutils.updateiDyn3Model(q_input, false);
     robot.setPositionDirectMode();
+    //robot.head.setPositionDirectMode();
+    //robot.right_arm.setPositionDirectMode();
+    //robot.left_arm.setPositionDirectMode();
+    //robot.left_leg.setPositionDirectMode();
+    //robot.right_leg.setPositionDirectMode();
+    
     
     q_initial = q_input;
     q_desired = q_input;
@@ -131,7 +137,7 @@ bool drc_poses_thread::custom_init()
 
 void drc_poses_thread::run()
 {
-    q_input=robot.sensePosition();
+    q_input=robot.sensePositionRefFeedback();
 
     robot.idynutils.updateiDyn3Model( q_input, false );
 
