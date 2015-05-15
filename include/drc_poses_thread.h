@@ -62,8 +62,16 @@ private:
     yarp::sig::Vector drive_q_right_leg;
     yarp::sig::Vector drive_q_left_leg;
     yarp::sig::Vector drive_q_head;
+
+    yarp::sig::Vector pre_homing_q_right_arm;
+    yarp::sig::Vector pre_homing_q_left_arm;
+    yarp::sig::Vector pre_homing_q_torso;
+    yarp::sig::Vector pre_homing_q_right_leg;
+    yarp::sig::Vector pre_homing_q_left_leg;
+    yarp::sig::Vector pre_homing_q_head;
+    yarp::sig::Vector pre_homing_q_left_hand;
+    yarp::sig::Vector pre_homing_q_right_hand;
     
-    std::fstream fs1;
 public:
     
     /**

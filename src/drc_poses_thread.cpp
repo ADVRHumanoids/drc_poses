@@ -70,7 +70,44 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     drive_q_torso[1]=-7*DEG2RAD;
     drive_q_torso[2]=45*DEG2RAD;
     
-    fs1.open ("poses_debug_jnt.m", std::fstream::out);
+    //pre_homing pose
+    pre_homing_q_right_arm.resize(robot.right_arm.getNumberOfJoints());
+    pre_homing_q_left_arm.resize(robot.left_arm.getNumberOfJoints());
+    pre_homing_q_torso.resize(robot.torso.getNumberOfJoints());
+    pre_homing_q_right_leg.resize(robot.right_leg.getNumberOfJoints());
+    pre_homing_q_left_leg.resize(robot.left_leg.getNumberOfJoints());
+    pre_homing_q_head.resize(robot.head.getNumberOfJoints());
+    pre_homing_q_left_hand.resize(1);
+    pre_homing_q_right_hand.resize(1);
+    
+    pre_homing_q_left_arm[0]=0.0;
+    pre_homing_q_left_arm[1]=0.4;
+    pre_homing_q_left_arm[2]=0.8;
+    pre_homing_q_left_arm[3]=-0.6;
+    pre_homing_q_left_arm[4]=0.0;
+    pre_homing_q_left_arm[5]=0.0;
+    pre_homing_q_left_arm[6]=0.0;
+    
+    pre_homing_q_right_arm[0]=0.0;
+    pre_homing_q_right_arm[1]=-0.4;
+    pre_homing_q_right_arm[2]=-0.8;
+    pre_homing_q_right_arm[3]=-0.6;
+    pre_homing_q_right_arm[4]=0.0;
+    pre_homing_q_right_arm[5]=0.0;
+    pre_homing_q_right_arm[6]=0.0;
+
+    pre_homing_q_left_hand[0]=0.0;
+    pre_homing_q_right_hand[0]=0.0;
+    
+    pre_homing_q_torso[0]=0.0;
+    pre_homing_q_torso[1]=0.0;
+    pre_homing_q_torso[2]=0.0;
+
+    pre_homing_q_left_leg[0]=0.2;
+    pre_homing_q_right_leg[0]=-0.2;
+
+    pre_homing_q_head[0]=0.0;
+    pre_homing_q_head[1]=0.0;
 }
 
 bool drc_poses_thread::custom_init()
@@ -202,6 +239,30 @@ void drc_poses_thread::run()
 			poses["driving"] = q;
 		    }
 
+		    if(cmd=="pre_homing") //We don't want to move the legs except for the first joint in this case
+		    {
+			yarp::sig::Vector q(robot.getNumberOfJoints());
+			yarp::sig::Vector q_in(robot.getNumberOfJoints());
+			yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
+			yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
+			yarp::sig::Vector q_torso(robot.torso.getNumberOfJoints());
+			yarp::sig::Vector q_right_leg(robot.right_leg.getNumberOfJoints());
+			yarp::sig::Vector q_left_leg(robot.left_leg.getNumberOfJoints());
+			yarp::sig::Vector q_head(robot.head.getNumberOfJoints());
+
+			q_in = robot.sensePosition();
+
+			robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+			q_left_leg[0] = pre_homing_q_left_leg[0];
+			pre_homing_q_left_leg = q_left_leg;
+			q_right_leg[0] = pre_homing_q_right_leg[0];
+			pre_homing_q_right_leg = q_right_leg;
+
+			robot.fromRobotToIdyn(pre_homing_q_right_arm,pre_homing_q_left_arm,pre_homing_q_torso,pre_homing_q_right_leg,pre_homing_q_left_leg,pre_homing_q_head,q);
+			poses["pre_homing"] = q;
+		    }
+		    
 		    q_desired = poses.at(cmd);
 
 		    if(status_definitions.status_to_code.count(cmd))
@@ -239,11 +300,6 @@ void drc_poses_thread::run()
     yarp::sig::Vector q_torso(3), q_left_arm(7), q_left_arm_real(7), q_right_arm(7), q_left_leg(6), q_right_leg(6), q_head(2);
     robot.fromIdynToRobot(q_output, q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head);
     yarp::sig::Vector real_q = robot.left_arm.sensePosition();
-    
-    static int i=1;
-    fs1<<"Jnt_real("<<i<<",:)=["<<q_left_arm[0]<<' '<<q_left_arm[1]<<' '<<q_left_arm[2]<<' '<<q_left_arm[3]<<' '<<q_left_arm[4]<<' '<<q_left_arm[5]<<' '<<q_left_arm[6]<<"];\n";
-    q_left_arm = real_q;
-    fs1<<"Jnt_SoT("<<i++<<",:)=["<<q_left_arm[0]<<' '<<q_left_arm[1]<<' '<<q_left_arm[2]<<' '<<q_left_arm[3]<<' '<<q_left_arm[4]<<' '<<q_left_arm[5]<<' '<<q_left_arm[6]<<"];\n";
 }
 
 yarp::sig::Vector drc_poses_thread::compute_delta_q()
@@ -297,6 +353,7 @@ void drc_poses_thread::create_poses()
     yarp::sig::Vector q(robot.getNumberOfJoints());
     poses["recover"] = q; //just to have it in the known commands
     poses["driving"] = q; //just to have it in the known commands
+    poses["pre_homing"] = q; //just to have it in the known commands
 
     yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
     yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
