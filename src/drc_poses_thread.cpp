@@ -20,9 +20,14 @@ yarp::sig::Vector right_arm_offset(7,right_offset);
 drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::ResourceFinder rf, std::shared_ptr< paramHelp::ParamHelperServer > ph)
 :control_thread( module_prefix, rf, ph ), cmd_interface(module_prefix), status_interface(module_prefix)
 {
-    q_input.resize(robot.getNumberOfJoints());
-    delta_q.resize(robot.getNumberOfJoints());
-    q_output.resize(robot.getNumberOfJoints());
+    q_input.resize(robot.getNumberOfJoints()-2);
+    delta_q.resize(robot.getNumberOfJoints()-2);
+    q_output.resize(robot.getNumberOfJoints()-2);
+    
+    wb_q_input.resize(robot.getNumberOfJoints());
+    wb_q_output.resize(robot.getNumberOfJoints());
+    left_hand_q.resize(1);
+    right_hand_q.resize(1);
 
     create_poses();
     for(auto item:poses) commands.push_back(item.first);
@@ -124,7 +129,17 @@ bool drc_poses_thread::custom_init()
     status_interface.start();
     status_interface.setStatus( "ready", status_seq_num++ );
 
-    q_input=robot.sensePositionRefFeedback();
+    //-- using new walkmaninterface --//
+
+    wb_q_input=robot.sensePositionRefFeedback();
+    
+    for(int i=0;i<q_input.size();i++) q_input[i]=wb_q_input[i]; //hands not considered
+
+    left_hand_q = wb_q_input[wb_q_input.size()-1];
+    right_hand_q = wb_q_input[wb_q_input.size()];
+    
+    //-- using new walkmaninterface --//
+
     robot.idynutils.updateiDyn3Model(q_input, false);
     robot.setPositionDirectMode();
     //robot.head.setPositionDirectMode();
@@ -142,7 +157,16 @@ bool drc_poses_thread::custom_init()
 
 void drc_poses_thread::run()
 {
-    q_input=robot.sensePositionRefFeedback();
+    //-- using new walkmaninterface --//
+
+    wb_q_input=robot.sensePositionRefFeedback();
+    
+    for(int i=0;i<q_input.size();i++) q_input[i]=wb_q_input[i]; //hands not considered
+
+    left_hand_q = wb_q_input[wb_q_input.size()-1];
+    right_hand_q = wb_q_input[wb_q_input.size()];
+    
+    //-- using new walkmaninterface --//
     
     yarp::sig::Vector q_torso(3), q_left_arm(7), q_right_arm(7), q_left_leg(6), q_right_leg(6), q_head(2);
     robot.fromIdynToRobot(q_input, q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head);
@@ -325,7 +349,16 @@ void drc_poses_thread::run()
     
     robot.fromRobotToIdyn(q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head, q_output);
     
-    robot.move(q_output);
+    //-- using new walkmaninterface --//
+    
+    for(int i=0;i<q_output.size();i++) wb_q_output[i]=q_output[i]; //hands not considered
+
+    wb_q_output[wb_q_input.size()-1] = left_hand_q[0];
+    wb_q_output[wb_q_input.size()] = right_hand_q[0];
+    
+    //-- using new walkmaninterface --//
+    
+    robot.move(wb_q_output);
 }
 
 yarp::sig::Vector drc_poses_thread::compute_delta_q()

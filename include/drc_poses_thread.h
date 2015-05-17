@@ -28,6 +28,8 @@ private:
 
     bool busy=false;
 
+    yarp::sig::Vector wb_q_input, wb_q_output;
+    yarp::sig::Vector left_hand_q, right_hand_q;
     yarp::sig::Vector q_input;
     yarp::sig::Vector delta_q;
     yarp::sig::Vector q_output;
