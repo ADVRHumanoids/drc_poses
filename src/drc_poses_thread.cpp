@@ -37,12 +37,12 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     
         
     //recover pose
-    recover_q_right_arm.resize(robot.right_arm.getNumberOfJoints());
-    recover_q_left_arm.resize(robot.left_arm.getNumberOfJoints());
-    recover_q_torso.resize(robot.torso.getNumberOfJoints());
-    recover_q_right_leg.resize(robot.right_leg.getNumberOfJoints());
-    recover_q_left_leg.resize(robot.left_leg.getNumberOfJoints());
-    recover_q_head.resize(robot.head.getNumberOfJoints());
+    recover_q_right_arm.resize(7);
+    recover_q_left_arm.resize(7);
+    recover_q_torso.resize(3);
+    recover_q_right_leg.resize(6);
+    recover_q_left_leg.resize(6);
+    recover_q_head.resize(2);
     
     recover_q_right_arm[0]=0.6;
     recover_q_right_arm[1]=-0.15;
@@ -61,12 +61,12 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     recover_q_left_arm[6]=0.0;
 
     //driving pose
-    drive_q_right_arm.resize(robot.right_arm.getNumberOfJoints());
-    drive_q_left_arm.resize(robot.left_arm.getNumberOfJoints());
-    drive_q_torso.resize(robot.torso.getNumberOfJoints());
-    drive_q_right_leg.resize(robot.right_leg.getNumberOfJoints());
-    drive_q_left_leg.resize(robot.left_leg.getNumberOfJoints());
-    drive_q_head.resize(robot.head.getNumberOfJoints());
+    drive_q_right_arm.resize(7);
+    drive_q_left_arm.resize(7);
+    drive_q_torso.resize(3);
+    drive_q_right_leg.resize(6);
+    drive_q_left_leg.resize(6);
+    drive_q_head.resize(2);
     
     drive_q_left_arm[0]=-10*DEG2RAD;
     drive_q_left_arm[1]=45*DEG2RAD;
@@ -81,12 +81,12 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     drive_q_torso[2]=45*DEG2RAD;
     
     //pre_homing pose
-    pre_homing_q_right_arm.resize(robot.right_arm.getNumberOfJoints());
-    pre_homing_q_left_arm.resize(robot.left_arm.getNumberOfJoints());
-    pre_homing_q_torso.resize(robot.torso.getNumberOfJoints());
-    pre_homing_q_right_leg.resize(robot.right_leg.getNumberOfJoints());
-    pre_homing_q_left_leg.resize(robot.left_leg.getNumberOfJoints());
-    pre_homing_q_head.resize(robot.head.getNumberOfJoints());
+    pre_homing_q_right_arm.resize(7);
+    pre_homing_q_left_arm.resize(7);
+    pre_homing_q_torso.resize(3);
+    pre_homing_q_right_leg.resize(6);
+    pre_homing_q_left_leg.resize(6);
+    pre_homing_q_head.resize(2);
     pre_homing_q_left_hand.resize(1);
     pre_homing_q_right_hand.resize(1);
     
@@ -239,12 +239,12 @@ void drc_poses_thread::run()
 		    {
 			yarp::sig::Vector q(robot.getNumberOfJoints());
 			yarp::sig::Vector q_in(robot.getNumberOfJoints());
-			yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
-			yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
-			yarp::sig::Vector q_torso(robot.torso.getNumberOfJoints());
-			yarp::sig::Vector q_right_leg(robot.right_leg.getNumberOfJoints());
-			yarp::sig::Vector q_left_leg(robot.left_leg.getNumberOfJoints());
-			yarp::sig::Vector q_head(robot.head.getNumberOfJoints());
+			yarp::sig::Vector q_right_arm(7);
+			yarp::sig::Vector q_left_arm(7);
+			yarp::sig::Vector q_torso(3);
+			yarp::sig::Vector q_right_leg(6);
+			yarp::sig::Vector q_left_leg(6);
+			yarp::sig::Vector q_head(2);
 
 			q_in = robot.sensePosition();
 
@@ -263,12 +263,12 @@ void drc_poses_thread::run()
 		    {
 			yarp::sig::Vector q(robot.getNumberOfJoints());
 			yarp::sig::Vector q_in(robot.getNumberOfJoints());
-			yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
-			yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
-			yarp::sig::Vector q_torso(robot.torso.getNumberOfJoints());
-			yarp::sig::Vector q_right_leg(robot.right_leg.getNumberOfJoints());
-			yarp::sig::Vector q_left_leg(robot.left_leg.getNumberOfJoints());
-			yarp::sig::Vector q_head(robot.head.getNumberOfJoints());
+			yarp::sig::Vector q_right_arm(7);
+			yarp::sig::Vector q_left_arm(7);
+			yarp::sig::Vector q_torso(3);
+			yarp::sig::Vector q_right_leg(6);
+			yarp::sig::Vector q_left_leg(6);
+			yarp::sig::Vector q_head(2);
 
 			q_in = robot.sensePosition();
 
@@ -287,12 +287,12 @@ void drc_poses_thread::run()
 		    {
 			yarp::sig::Vector q(robot.getNumberOfJoints());
 			yarp::sig::Vector q_in(robot.getNumberOfJoints());
-			yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
-			yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
-			yarp::sig::Vector q_torso(robot.torso.getNumberOfJoints());
-			yarp::sig::Vector q_right_leg(robot.right_leg.getNumberOfJoints());
-			yarp::sig::Vector q_left_leg(robot.left_leg.getNumberOfJoints());
-			yarp::sig::Vector q_head(robot.head.getNumberOfJoints());
+			yarp::sig::Vector q_right_arm(7);
+			yarp::sig::Vector q_left_arm(7);
+			yarp::sig::Vector q_torso(3);
+			yarp::sig::Vector q_right_leg(6);
+			yarp::sig::Vector q_left_leg(6);
+			yarp::sig::Vector q_head(2);
 
 			q_in = robot.sensePosition();
 
@@ -304,8 +304,8 @@ void drc_poses_thread::run()
 			pre_homing_q_right_leg = q_right_leg;
 
 			robot.fromRobotToIdyn(pre_homing_q_right_arm,pre_homing_q_left_arm,pre_homing_q_torso,pre_homing_q_right_leg,pre_homing_q_left_leg,pre_homing_q_head,q);
-            robot.left_hand.move(pre_homing_q_left_hand);
-            robot.right_hand.move(pre_homing_q_right_hand);
+            left_hand_q = pre_homing_q_left_hand;
+            right_hand_q = pre_homing_q_right_hand;
 			poses["pre_homing"] = q;
 		    }
 		    
@@ -414,12 +414,12 @@ void drc_poses_thread::create_poses()
     poses["driving"] = q; //just to have it in the known commands
     poses["pre_homing"] = q; //just to have it in the known commands
 
-    yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
-    yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
-    yarp::sig::Vector q_torso(robot.torso.getNumberOfJoints());
-    yarp::sig::Vector q_right_leg(robot.right_leg.getNumberOfJoints());
-    yarp::sig::Vector q_left_leg(robot.left_leg.getNumberOfJoints());
-    yarp::sig::Vector q_head(robot.head.getNumberOfJoints());
+    yarp::sig::Vector q_right_arm(7);
+    yarp::sig::Vector q_left_arm(7);
+    yarp::sig::Vector q_torso(3);
+    yarp::sig::Vector q_right_leg(6);
+    yarp::sig::Vector q_left_leg(6);
+    yarp::sig::Vector q_head(2);
 
     //---------------------- homing ---------------------
     q_right_arm.zero();
