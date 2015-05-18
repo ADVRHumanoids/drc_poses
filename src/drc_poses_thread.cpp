@@ -135,8 +135,8 @@ bool drc_poses_thread::custom_init()
     
     for(int i=0;i<q_input.size();i++) q_input[i]=wb_q_input[i]; //hands not considered
 
-    left_hand_q = wb_q_input[wb_q_input.size()-1];
-    right_hand_q = wb_q_input[wb_q_input.size()];
+    left_hand_q = wb_q_input[robot.left_hand_index];
+    right_hand_q = wb_q_input[robot.right_hand_index];
     
     //-- using new walkmaninterface --//
 
@@ -163,8 +163,8 @@ void drc_poses_thread::run()
     
     for(int i=0;i<q_input.size();i++) q_input[i]=wb_q_input[i]; //hands not considered
 
-    left_hand_q = wb_q_input[wb_q_input.size()-1];
-    right_hand_q = wb_q_input[wb_q_input.size()];
+    left_hand_q = wb_q_input[robot.left_hand_index];
+    right_hand_q = wb_q_input[robot.right_hand_index];
     
     //-- using new walkmaninterface --//
     
@@ -353,8 +353,8 @@ void drc_poses_thread::run()
     
     for(int i=0;i<q_output.size();i++) wb_q_output[i]=q_output[i]; //hands not considered
 
-    wb_q_output[wb_q_input.size()-1] = left_hand_q[0];
-    wb_q_output[wb_q_input.size()] = right_hand_q[0];
+    wb_q_output[robot.left_hand_index] = left_hand_q[0];
+    wb_q_output[robot.right_hand_index] = right_hand_q[0];
     
     //-- using new walkmaninterface --//
     
