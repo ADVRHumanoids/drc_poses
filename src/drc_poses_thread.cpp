@@ -343,7 +343,8 @@ void drc_poses_thread::run()
     q_left_arm = q_left_arm + left_arm_offset;
     q_right_arm = q_right_arm + right_arm_offset;
     
-    yarp::sig::Vector q_move;
+    yarp::sig::Vector q_move(actuated_joints);
+//     q_move.resize(31);
     robot.fromRobotToIdyn29(q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_move);
 
     robot.move29(q_move);
