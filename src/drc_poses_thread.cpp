@@ -68,10 +68,6 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     recover_q_torso[1] = 0.0;
     recover_q_torso[2] = 0.0;
     
-    // recover walking
-    recover_q_right_arm[6]=-50.0*DEG2RAD;
-    recover_q_left_arm[6]=  50.0*DEG2RAD;
-    
     //driving pose
     drive_q_right_arm.resize(right_arm_joints);
     drive_q_left_arm.resize(left_arm_joints);
@@ -275,9 +271,16 @@ void drc_poses_thread::run()
 			recover_q_left_leg = q_left_leg;
 			recover_q_right_leg = q_right_leg;
 			recover_q_head = q_head;
-
+			
+			// recover walking
+			recover_q_right_arm[6]=50.0*DEG2RAD;
+			recover_q_left_arm[6]= -50.0*DEG2RAD;
+			
 			robot.fromRobotToIdyn31(recover_q_right_arm,recover_q_left_arm,recover_q_torso,recover_q_right_leg,recover_q_left_leg,recover_q_head,q);
 			poses["recover_walking"] = q;
+			
+			recover_q_right_arm[6]=0.0;
+			recover_q_left_arm[6]=0.0;
 		    }
 		    
 		    if(cmd=="driving") //We don't want to move the legs in this case
