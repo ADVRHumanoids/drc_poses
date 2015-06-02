@@ -56,6 +56,13 @@ private:
     yarp::sig::Vector recover_q_left_leg;
     yarp::sig::Vector recover_q_head;
 
+    yarp::sig::Vector walking_q_right_arm;
+    yarp::sig::Vector walking_q_left_arm;
+    yarp::sig::Vector walking_q_torso;
+    yarp::sig::Vector walking_q_right_leg;
+    yarp::sig::Vector walking_q_left_leg;
+    yarp::sig::Vector walking_q_head;
+    
     yarp::sig::Vector drive_q_right_arm;
     yarp::sig::Vector drive_q_left_arm;
     yarp::sig::Vector drive_q_torso;

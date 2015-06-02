@@ -48,25 +48,53 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     recover_q_left_leg.resize(left_leg_joints);
     recover_q_head.resize(head_joints);
     
-    recover_q_right_arm[0]=60.0*DEG2RAD;
-    recover_q_right_arm[1]=-10.0*DEG2RAD;
-    recover_q_right_arm[2]=20.0*DEG2RAD;
-    recover_q_right_arm[3]=-110.0*DEG2RAD;
-    recover_q_right_arm[4]=0.0*DEG2RAD;
-    recover_q_right_arm[5]=-30.0*DEG2RAD;
-    recover_q_right_arm[6]=0.0*DEG2RAD;
+    recover_q_right_arm[0]=0.75;
+    recover_q_right_arm[1]=-0.3;
+    recover_q_right_arm[2]=-0.2;
+    recover_q_right_arm[3]=-1.05;
+    recover_q_right_arm[4]=0.0;
+    recover_q_right_arm[5]=0.0;
+    recover_q_right_arm[6]=0.0;
 
-    recover_q_left_arm[0]=60.0*DEG2RAD;
-    recover_q_left_arm[1]=10.0*DEG2RAD;
-    recover_q_left_arm[2]=-20.0*DEG2RAD;
-    recover_q_left_arm[3]=-110.0*DEG2RAD;
-    recover_q_left_arm[4]=0.0*DEG2RAD;
-    recover_q_left_arm[5]=-30.0*DEG2RAD;
-    recover_q_left_arm[6]=0.0*DEG2RAD;
+    recover_q_left_arm[0]=0.75;
+    recover_q_left_arm[1]=0.3;
+    recover_q_left_arm[2]=0.2;
+    recover_q_left_arm[3]=-1.05;
+    recover_q_left_arm[4]=0.0;
+    recover_q_left_arm[5]=0.0;
+    recover_q_left_arm[6]=0.0;
     
     recover_q_torso[0] = 0.0;
     recover_q_torso[1] = 0.0;
     recover_q_torso[2] = 0.0;
+    
+    //walking pose
+    walking_q_right_arm.resize(right_arm_joints);
+    walking_q_left_arm.resize(left_arm_joints);
+    walking_q_torso.resize(torso_joints);
+    walking_q_right_leg.resize(right_leg_joints);
+    walking_q_left_leg.resize(left_leg_joints);
+    walking_q_head.resize(head_joints);
+    
+    walking_q_right_arm[0]=60.0*DEG2RAD;
+    walking_q_right_arm[1]=-10.0*DEG2RAD;
+    walking_q_right_arm[2]=20.0*DEG2RAD;
+    walking_q_right_arm[3]=-110.0*DEG2RAD;
+    walking_q_right_arm[4]=0.0*DEG2RAD;
+    walking_q_right_arm[5]=-30.0*DEG2RAD;
+    walking_q_right_arm[6]=50.0*DEG2RAD;
+
+    walking_q_left_arm[0]=60.0*DEG2RAD;
+    walking_q_left_arm[1]=10.0*DEG2RAD;
+    walking_q_left_arm[2]=-20.0*DEG2RAD;
+    walking_q_left_arm[3]=-110.0*DEG2RAD;
+    walking_q_left_arm[4]=0.0*DEG2RAD;
+    walking_q_left_arm[5]=-30.0*DEG2RAD;
+    walking_q_left_arm[6]=-50.0*DEG2RAD;
+    
+    walking_q_torso[0] = 0.0;
+    walking_q_torso[1] = 0.0;
+    walking_q_torso[2] = 0.0;
     
     //driving pose
     drive_q_right_arm.resize(right_arm_joints);
@@ -253,34 +281,27 @@ void drc_poses_thread::run()
 			poses["recover"] = q;
 		    }
 		    
-		    if(cmd=="recover_walking") //We don't want to move the legs in this case
+		    if(cmd=="walking") //We don't want to move the legs in this case
 		    {
 			yarp::sig::Vector q(kinematic_joints);
-			yarp::sig::Vector q_in(kinematic_joints);
-			yarp::sig::Vector q_right_arm(right_arm_joints);
-			yarp::sig::Vector q_left_arm(left_arm_joints);
-			yarp::sig::Vector q_torso(torso_joints);
-			yarp::sig::Vector q_right_leg(right_leg_joints);
-			yarp::sig::Vector q_left_leg(left_leg_joints);
-			yarp::sig::Vector q_head(head_joints);
+            yarp::sig::Vector q_in(kinematic_joints);
+            yarp::sig::Vector q_right_arm(right_arm_joints);
+            yarp::sig::Vector q_left_arm(left_arm_joints);
+            yarp::sig::Vector q_torso(torso_joints);
+            yarp::sig::Vector q_right_leg(right_leg_joints);
+            yarp::sig::Vector q_left_leg(left_leg_joints);
+            yarp::sig::Vector q_head(head_joints);
 
-			q_in=joint_sense();
+            q_in=joint_sense();
 
-			robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+            robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
-			recover_q_left_leg = q_left_leg;
-			recover_q_right_leg = q_right_leg;
-			recover_q_head = q_head;
-			
-			// recover walking
-			recover_q_right_arm[6]=50.0*DEG2RAD;
-			recover_q_left_arm[6]= -50.0*DEG2RAD;
-			
-			robot.fromRobotToIdyn31(recover_q_right_arm,recover_q_left_arm,recover_q_torso,recover_q_right_leg,recover_q_left_leg,recover_q_head,q);
-			poses["recover_walking"] = q;
-			
-			recover_q_right_arm[6]=0.0;
-			recover_q_left_arm[6]=0.0;
+            walking_q_left_leg = q_left_leg;
+            walking_q_right_leg = q_right_leg;
+            walking_q_head = q_head;
+
+            robot.fromRobotToIdyn31(walking_q_right_arm,walking_q_left_arm,walking_q_torso,walking_q_right_leg,walking_q_left_leg,walking_q_head,q);
+            poses["walking"] = q;
 		    }
 		    
 		    if(cmd=="driving") //We don't want to move the legs in this case
@@ -431,7 +452,7 @@ void drc_poses_thread::create_poses()
     
     yarp::sig::Vector q(kinematic_joints);
     poses["recover"] = q; //just to have it in the known commands
-    poses["recover_walking"] = q; //just to have it in the known commands
+    poses["walking"] = q; //just to have it in the known commands
     poses["driving"] = q; //just to have it in the known commands
     poses["pre_homing"] = q; //just to have it in the known commands
 
