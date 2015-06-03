@@ -12,11 +12,6 @@ using namespace yarp::math;
 #define RAD2DEG    (180.0/M_PI)
 #define DEG2RAD    (M_PI/180.0)
 
-double left_offset[7] = {-0.001878101, -0.087266425, -0.00541460025, -0.04116454775, -0.0270602895, 0.05685963075, 0.05985226625};
-double right_offset[7] = {0.00496249625, 0.01221735225, 0.023223271, -0.01633125525, -0.04591635675, 0.0131223505, -0.0860596935};
-yarp::sig::Vector left_arm_offset(7,left_offset);
-yarp::sig::Vector right_arm_offset(7,right_offset);
-
 drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::ResourceFinder rf, std::shared_ptr< paramHelp::ParamHelperServer > ph)
 :control_thread( module_prefix, rf, ph ), cmd_interface(module_prefix), status_interface(module_prefix)
 {
@@ -193,10 +188,6 @@ void drc_poses_thread::run()
 
     yarp::sig::Vector q_torso(3), q_left_arm(7), q_right_arm(7), q_left_leg(6), q_right_leg(6), q_head(2);
     robot.fromIdynToRobot31(q_input, q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head);
-    
-    //OFFSET 
-    q_left_arm = q_left_arm - left_arm_offset;
-    q_right_arm = q_right_arm - right_arm_offset;
     
     robot.fromRobotToIdyn31(q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head, q_input);
 
@@ -389,11 +380,7 @@ void drc_poses_thread::run()
     q_output = q_initial + delta_q;
 
     robot.fromIdynToRobot31(q_output, q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head);
-    
-    //OFFSET 
-    q_left_arm = q_left_arm + left_arm_offset;
-    q_right_arm = q_right_arm + right_arm_offset;
-    
+        
     yarp::sig::Vector q_move(actuated_joints);
 //     q_move.resize(31);
     robot.fromRobotToIdyn29(q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_move);
