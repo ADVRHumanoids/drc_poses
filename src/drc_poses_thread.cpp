@@ -399,7 +399,7 @@ void drc_poses_thread::run()
     robot.fromRobotToIdyn29(q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_move);
 
     robot.move29(q_move);
-    robot.moveNeck(q_head);
+    robot.moveNeck(q_head[0], q_head[1]);
 }
 
 yarp::sig::Vector drc_poses_thread::compute_delta_q()
