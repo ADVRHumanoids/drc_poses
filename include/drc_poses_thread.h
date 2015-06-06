@@ -49,6 +49,9 @@ private:
     void create_poses();
     void print_help();
 
+    yarp::sig::Vector  wave_q_left_arm_start;
+    yarp::sig::Vector  wave_q_torso_start;
+    yarp::sig::Vector  wave_q_left_arm_end;
     yarp::sig::Vector recover_q_right_arm;
     yarp::sig::Vector recover_q_left_arm;
     yarp::sig::Vector recover_q_torso;
