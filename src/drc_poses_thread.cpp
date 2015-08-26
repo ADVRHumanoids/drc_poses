@@ -912,6 +912,55 @@ void drc_poses_thread::create_poses()
 
     poses["driving_pose"] = q;
 
+    //---------------------- homing ---------------------
+    q_right_arm.zero();
+    q_left_arm.zero();
+    q_torso.zero();
+    q_right_leg.zero();
+    q_left_leg.zero();
+    q_head.zero();
+
+    q_right_arm[0]=60.0*DEG2RAD;
+    q_right_arm[1]=-10.0*DEG2RAD;
+    q_right_arm[2]=20.0*DEG2RAD;
+    q_right_arm[3]=-110.0*DEG2RAD;
+    q_right_arm[4]=0.0*DEG2RAD;
+    q_right_arm[5]=-30.0*DEG2RAD;
+    q_right_arm[6]=0.0*DEG2RAD;
+
+    q_left_arm[0]=60.0*DEG2RAD;
+    q_left_arm[1]=10.0*DEG2RAD;
+    q_left_arm[2]=-20.0*DEG2RAD;
+    q_left_arm[3]=-110.0*DEG2RAD;
+    q_left_arm[4]=0.0*DEG2RAD;
+    q_left_arm[5]=-30.0*DEG2RAD;
+    q_left_arm[6]=0.0*DEG2RAD;
+
+    q_torso[0] = 0.0;
+    q_torso[1] = 0.0;
+    q_torso[2] = 0.0;
+
+    q_right_leg[0]=2.2*DEG2RAD;
+    q_right_leg[1]=0.15*DEG2RAD;
+    q_right_leg[2]=-17.2*DEG2RAD;
+    q_right_leg[3]=33.2*DEG2RAD;
+    q_right_leg[4]=-16.0*DEG2RAD;
+    q_right_leg[5]=-2.25*DEG2RAD;
+
+    q_left_leg[0]=-2.2*DEG2RAD;
+    q_left_leg[1]=-0.15*DEG2RAD;
+    q_left_leg[2]=-17.2*DEG2RAD;
+    q_left_leg[3]=33.2*DEG2RAD;
+    q_left_leg[4]=-16.0*DEG2RAD;
+    q_left_leg[5]=2.25*DEG2RAD;
+
+    //q_head[0] = 30.0*DEG2RAD; //left
+    q_head[1] = 20.0*DEG2RAD; //down
+
+    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+
+    poses["grasp_homing"] = q;
+
     //------------------ POSES FOR DEMO ----------------
     //---------------------- demo0 ---------------------
     q_right_arm.zero();
