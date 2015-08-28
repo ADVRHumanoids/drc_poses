@@ -188,7 +188,7 @@ bool drc_poses_thread::custom_init()
 
     q_input=joint_sense();
     robot.idynutils.updateiDyn3Model(q_input, false);
-    robot.setPositionDirectMode();
+//     robot.setPositionDirectMode();
 
     q_initial = q_input;
     q_desired = q_input;
@@ -200,8 +200,8 @@ yarp::sig::Vector drc_poses_thread::joint_sense()
 {
     yarp::sig::Vector out(kinematic_joints);
     
-//     yarp::sig::Vector in = robot.sensePositionRefFeedback(); //REAL_ROBOT
-    yarp::sig::Vector in = robot.sensePosition(); //SIMULATION
+    yarp::sig::Vector in = robot.sensePositionRefFeedback(); //REAL_ROBOT
+//     yarp::sig::Vector in = robot.sensePosition(); //SIMULATION
 
     for(int i=0;i<out.size();i++) out[i]=in[i];
     
@@ -232,28 +232,28 @@ void drc_poses_thread::run()
 	{
 	    if(demo_mode)
 	    {
-// 	        if(last_command=="demo") cmd="demo2";
-// 		if(last_command=="demo0") cmd="demo1";
-// 		if(last_command=="demo1") cmd="demo2";
-// 		if(last_command=="demo2") cmd="demo3";
-// 		if(last_command=="demo3") cmd="demo4";
-// 		if(last_command=="demo4") cmd="demo5";
-// 		if(last_command=="demo5") cmd="demo6";
-// 		if(last_command=="demo6") cmd="demo7";
-// 		if(last_command=="demo7") cmd="demo8";
-// 		if(last_command=="demo8") cmd="demo9";
-// 		if(last_command=="demo9") cmd="demo10";
-// 		if(last_command=="demo10") cmd="demo11";
-// 		if(last_command=="demo11") cmd="demo12";
-// 		if(last_command=="demo12") cmd="demo13";
-// 		if(last_command=="demo13") cmd="demo14";
-// 		if(last_command=="demo14") cmd="demo15";
-// 		if(last_command=="demo15") cmd="demo16";
-// 		if(last_command=="demo16") cmd="demo17";
-// 		if(last_command=="demo17") demo_mode=false;
-		if(last_command=="demo") cmd="wave_1";
-		if(last_command=="wave_1") cmd="wave_2";
-		if(last_command=="wave_2") cmd="wave_1";
+	    if(last_command=="demo") cmd="demo2";
+		if(last_command=="demo0") cmd="demo1";
+		if(last_command=="demo1") cmd="demo2";
+		if(last_command=="demo2") cmd="demo3";
+		if(last_command=="demo3") cmd="demo4";
+		if(last_command=="demo4") cmd="demo5";
+		if(last_command=="demo5") cmd="demo6";
+		if(last_command=="demo6") cmd="demo7";
+		if(last_command=="demo7") cmd="demo8";
+		if(last_command=="demo8") cmd="demo9";
+		if(last_command=="demo9") cmd="demo13"; // NOTE jump to 13
+		if(last_command=="demo10") cmd="demo11";
+		if(last_command=="demo11") cmd="demo12";
+		if(last_command=="demo12") cmd="demo13";
+		if(last_command=="demo13") cmd="demo14";
+		if(last_command=="demo14") cmd="demo15";
+		if(last_command=="demo15") cmd="demo16";
+		if(last_command=="demo16") cmd="demo17";
+		if(last_command=="demo17") demo_mode=false;
+// 		if(last_command=="demo") cmd="wave_1";
+// 		if(last_command=="wave_1") cmd="wave_2";
+// 		if(last_command=="wave_2") cmd="wave_1";
 	    }
 
 	    if(cmd=="demo")
