@@ -40,9 +40,17 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
 //     wave_q_torso_start[0] = 0.0*DEG2RAD;
 //     wave_q_torso_start[1] = -10.0*DEG2RAD;
 //     wave_q_torso_start[2] = 90.0*DEG2RAD;
+
+    wave_q_right_arm_start.resize(right_arm_joints);
+    wave_q_right_arm_start[0] = 0.0*DEG2RAD;
+    wave_q_right_arm_start[1] = 25.0*DEG2RAD;
+    wave_q_right_arm_start[2] = -120.0*DEG2RAD;
+    wave_q_right_arm_start[3] = -100.0*DEG2RAD;
+    wave_q_right_arm_start[4] = 0.0*DEG2RAD;
+    wave_q_right_arm_start[5] = 0.0*DEG2RAD;
+    wave_q_right_arm_start[6] = 0.0*DEG2RAD;
   
     wave_q_left_arm_start.resize(left_arm_joints);
-    
     wave_q_left_arm_start[0] = 0.0*DEG2RAD;
     wave_q_left_arm_start[1] = 25.0*DEG2RAD;
     wave_q_left_arm_start[2] = 120.0*DEG2RAD;
@@ -56,8 +64,16 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     wave_q_head_start[1] = 0.0;
       
     // wave 2
-    wave_q_left_arm_end.resize(left_arm_joints);
+    wave_q_right_arm_end.resize(right_arm_joints);
+    wave_q_right_arm_end[0] = 0.0*DEG2RAD;
+    wave_q_right_arm_end[1] = 25.0*DEG2RAD;
+    wave_q_right_arm_end[2] = -120.0*DEG2RAD;
+    wave_q_right_arm_end[3] = -140.0*DEG2RAD;
+    wave_q_right_arm_end[4] = 0.0*DEG2RAD;
+    wave_q_right_arm_end[5] = 0.0*DEG2RAD;
+    wave_q_right_arm_end[6] = 0.0*DEG2RAD;
     
+    wave_q_left_arm_end.resize(left_arm_joints);
     wave_q_left_arm_end[0] = 0.0*DEG2RAD;
     wave_q_left_arm_end[1] = 25.0*DEG2RAD;
     wave_q_left_arm_end[2] = 120.0*DEG2RAD;
@@ -261,12 +277,18 @@ void drc_poses_thread::run()
 // 		if(last_command=="demo16") cmd="demo17";
 // 		if(last_command=="demo17") demo_mode=false;
                 
-		if(last_command=="demo") cmd="wave_1";
+                // 1 HAND 
+		if(last_command=="hello_1") cmd="wave_1";
 		if(last_command=="wave_1") cmd="wave_2";
 		if(last_command=="wave_2") cmd="wave_1";
+                
+                // 2 HANDS
+                if(last_command=="hello_2") cmd="wave_2_1";
+                if(last_command=="wave_2_1") cmd="wave_2_2";
+                if(last_command=="wave_2_2") cmd="wave_2_1";
 	    }
 
-	    if(cmd=="demo")
+	    if( (cmd == "hello_1") || (cmd == "hello_2") )
 	    {
 		demo_mode=true;
 	    }
@@ -386,7 +408,7 @@ void drc_poses_thread::run()
 			poses["pre_homing"] = q;
 		    }
 		    
-		    // PER SALUTARE IL PUBBLICO
+		    // HELLO 1 HAND start
 		    if(cmd=="wave_1")
 		    {
 			yarp::sig::Vector q(kinematic_joints);
@@ -409,7 +431,7 @@ void drc_poses_thread::run()
 			robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 			poses["wave_1"] = q;
 		    }
-		    // PER SALUTARE IL PUBBLICO
+		    // HELLO 1 HAND end
 		    if(cmd=="wave_2")
 		    {
 			yarp::sig::Vector q(kinematic_joints);
@@ -431,6 +453,54 @@ void drc_poses_thread::run()
 			robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 			poses["wave_2"] = q;
 		    }
+		    
+		    // HELLO 2 HANDS start
+                    if(cmd=="wave_2_1")
+                    {
+                        yarp::sig::Vector q(kinematic_joints);
+                        yarp::sig::Vector q_in(kinematic_joints);
+                        yarp::sig::Vector q_right_arm(right_arm_joints);
+                        yarp::sig::Vector q_left_arm(left_arm_joints);
+                        yarp::sig::Vector q_torso(torso_joints);
+                        yarp::sig::Vector q_right_leg(right_leg_joints);
+                        yarp::sig::Vector q_left_leg(left_leg_joints);
+                        yarp::sig::Vector q_head(head_joints);
+
+                        q_in=joint_sense();
+
+                        robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+                        q_right_arm = wave_q_right_arm_start;
+                        q_left_arm = wave_q_left_arm_start;
+                        q_head = wave_q_head_start;
+                        //q_torso = wave_q_torso_start;
+
+                        robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+                        poses["wave_2_1"] = q;
+                    }
+                    // HELLO 2 HANDS end
+                    if(cmd=="wave_2_2")
+                    {
+                        yarp::sig::Vector q(kinematic_joints);
+                        yarp::sig::Vector q_in(kinematic_joints);
+                        yarp::sig::Vector q_right_arm(right_arm_joints);
+                        yarp::sig::Vector q_left_arm(left_arm_joints);
+                        yarp::sig::Vector q_torso(torso_joints);
+                        yarp::sig::Vector q_right_leg(right_leg_joints);
+                        yarp::sig::Vector q_left_leg(left_leg_joints);
+                        yarp::sig::Vector q_head(head_joints);
+
+                        q_in=joint_sense();
+
+                        robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+                        q_right_arm = wave_q_right_arm_end;
+                        q_left_arm = wave_q_left_arm_end;
+                        q_head = wave_q_head_end;
+
+                        robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+                        poses["wave_2_2"] = q;
+                    }
 		    
 		    q_desired = poses.at(cmd);
 
@@ -529,6 +599,8 @@ void drc_poses_thread::create_poses()
     poses["pre_homing"] = q; //just to have it in the known commands
     poses["wave_1"] = q;
     poses["wave_2"] = q;
+    poses["wave_2_1"] = q;
+    poses["wave_2_2"] = q;
 
     yarp::sig::Vector q_right_arm(right_arm_joints);
     yarp::sig::Vector q_left_arm(left_arm_joints);
