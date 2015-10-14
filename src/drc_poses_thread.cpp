@@ -42,18 +42,18 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
 //     wave_q_torso_start[2] = 90.0*DEG2RAD;
 
     wave_q_right_arm_start.resize(right_arm_joints);
-    wave_q_right_arm_start[0] = 0.0*DEG2RAD;
-    wave_q_right_arm_start[1] = 25.0*DEG2RAD;
-    wave_q_right_arm_start[2] = -120.0*DEG2RAD;
+    wave_q_right_arm_start[0] = 20.0*DEG2RAD;
+    wave_q_right_arm_start[1] = -80.0*DEG2RAD;
+    wave_q_right_arm_start[2] = -80.0*DEG2RAD;
     wave_q_right_arm_start[3] = -100.0*DEG2RAD;
     wave_q_right_arm_start[4] = 0.0*DEG2RAD;
     wave_q_right_arm_start[5] = 0.0*DEG2RAD;
     wave_q_right_arm_start[6] = 0.0*DEG2RAD;
   
     wave_q_left_arm_start.resize(left_arm_joints);
-    wave_q_left_arm_start[0] = 0.0*DEG2RAD;
-    wave_q_left_arm_start[1] = 25.0*DEG2RAD;
-    wave_q_left_arm_start[2] = 120.0*DEG2RAD;
+    wave_q_left_arm_start[0] = 20.0*DEG2RAD;
+    wave_q_left_arm_start[1] = 80.0*DEG2RAD;
+    wave_q_left_arm_start[2] = 80.0*DEG2RAD;
     wave_q_left_arm_start[3] = -100.0*DEG2RAD;
     wave_q_left_arm_start[4] = 0.0*DEG2RAD;
     wave_q_left_arm_start[5] = 0.0*DEG2RAD;
@@ -65,18 +65,18 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
       
     // wave 2
     wave_q_right_arm_end.resize(right_arm_joints);
-    wave_q_right_arm_end[0] = 0.0*DEG2RAD;
-    wave_q_right_arm_end[1] = 25.0*DEG2RAD;
-    wave_q_right_arm_end[2] = -120.0*DEG2RAD;
+    wave_q_right_arm_end[0] = 20.0*DEG2RAD;
+    wave_q_right_arm_end[1] = -80.0*DEG2RAD;
+    wave_q_right_arm_end[2] = -80.0*DEG2RAD;
     wave_q_right_arm_end[3] = -140.0*DEG2RAD;
     wave_q_right_arm_end[4] = 0.0*DEG2RAD;
     wave_q_right_arm_end[5] = 0.0*DEG2RAD;
     wave_q_right_arm_end[6] = 0.0*DEG2RAD;
     
     wave_q_left_arm_end.resize(left_arm_joints);
-    wave_q_left_arm_end[0] = 0.0*DEG2RAD;
-    wave_q_left_arm_end[1] = 25.0*DEG2RAD;
-    wave_q_left_arm_end[2] = 120.0*DEG2RAD;
+    wave_q_left_arm_end[0] = 20.0*DEG2RAD;
+    wave_q_left_arm_end[1] = 80.0*DEG2RAD;
+    wave_q_left_arm_end[2] = 80.0*DEG2RAD;
     wave_q_left_arm_end[3] = -140.0*DEG2RAD;
     wave_q_left_arm_end[4] = 0.0*DEG2RAD;
     wave_q_left_arm_end[5] = 0.0*DEG2RAD;
