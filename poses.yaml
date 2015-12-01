@@ -1,0 +1,14 @@
+poses:
+ - pose_name : pose1 
+   right_arm : [0, 0, 0, 0, 0, 0, 0]
+   left_arm  : [0, 0, 0, 0, 0, 0, 0]
+   right_leg : [0, 0, 0, 0, 0, 0]
+   left_leg  : [0, 0, 0, 0, 0, 0]
+   head      : [0, 0]
+   torso     : [0, 0, 0]
+   
+ - pose_name : pose2 
+   right_arm : [0, 0, 0, 0, 0, 0, 0]
+   left_arm  : [0, 0, 0, 0, 0, 0, 0]
+   torso     : [0, 0, 0]
+

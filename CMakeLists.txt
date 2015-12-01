@@ -1,3 +1,4 @@
+
 # 
 #  Copyright (C) 2014 Walkman
 #  Author: Alessandro Settimi
@@ -65,6 +66,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${iDynTree_LIBRARIES}
 				      ${idynutils_LIBRARIES}
 				      ${GYM_LIBRARIES}
 				      ${trajectory_generator_LIBRARIES}
+				      yaml-cpp
 				      )
 
 add_subdirectory(app)

@@ -3,8 +3,13 @@
 #include "drc_poses_thread.h"
 #include "drc_poses_constants.h"
 
+#include <iostream>
+#include <fstream>
+
+
 using namespace walkman::drc::poses;
 using namespace yarp::math;
+using namespace std;
 
 #define Max_Vel         0.5 // maximum joint velocity [rad/s]
 #define Min_Texe        2.0 // minimum execution time for homing [sec]
@@ -12,17 +17,16 @@ using namespace yarp::math;
 #define RAD2DEG    (180.0/M_PI)
 #define DEG2RAD    (M_PI/180.0)
 
-double left_offset[7] = {-0.001878101, -0.087266425, -0.00541460025, -0.04116454775, -0.0270602895, 0.05685963075, 0.05985226625};
-double right_offset[7] = {0.00496249625, 0.01221735225, 0.023223271, -0.01633125525, -0.04591635675, 0.0131223505, -0.0860596935};
-yarp::sig::Vector left_arm_offset(7,left_offset);
-yarp::sig::Vector right_arm_offset(7,right_offset);
-
 drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::ResourceFinder rf, std::shared_ptr< paramHelp::ParamHelperServer > ph)
 :control_thread( module_prefix, rf, ph ), cmd_interface(module_prefix), status_interface(module_prefix)
 {
-    q_input.resize(robot.getNumberOfJoints());
-    delta_q.resize(robot.getNumberOfJoints());
-    q_output.resize(robot.getNumberOfJoints());
+    kinematic_joints = robot.getNumberOfKinematicJoints();
+    actuated_joints = robot.getNumberOfActuatedJoints();
+  
+    loadPoses("/home/przemek/src/walkman/build/drc/drc_poses/poses.yaml");
+    q_input.resize(kinematic_joints);
+    delta_q.resize(kinematic_joints);
+    q_output.resize(kinematic_joints);
 
     create_poses();
     for(auto item:poses) commands.push_back(item.first);
@@ -30,7 +34,58 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     next_time=0.0;
     final_time=Min_Texe;   //devel_JLee
     
-        
+    // wave 1
+    
+//     wave_q_torso_start.resize(3);
+//     wave_q_torso_start[0] = 0.0*DEG2RAD;
+//     wave_q_torso_start[1] = -10.0*DEG2RAD;
+//     wave_q_torso_start[2] = 90.0*DEG2RAD;
+
+    wave_q_right_arm_start.resize(right_arm_joints);
+    wave_q_right_arm_start[0] = 20.0*DEG2RAD;
+    wave_q_right_arm_start[1] = -80.0*DEG2RAD;
+    wave_q_right_arm_start[2] = -80.0*DEG2RAD;
+    wave_q_right_arm_start[3] = -100.0*DEG2RAD;
+    wave_q_right_arm_start[4] = 0.0*DEG2RAD;
+    wave_q_right_arm_start[5] = 0.0*DEG2RAD;
+    wave_q_right_arm_start[6] = 0.0*DEG2RAD;
+  
+    wave_q_left_arm_start.resize(left_arm_joints);
+    wave_q_left_arm_start[0] = 20.0*DEG2RAD;
+    wave_q_left_arm_start[1] = 80.0*DEG2RAD;
+    wave_q_left_arm_start[2] = 80.0*DEG2RAD;
+    wave_q_left_arm_start[3] = -100.0*DEG2RAD;
+    wave_q_left_arm_start[4] = 0.0*DEG2RAD;
+    wave_q_left_arm_start[5] = 0.0*DEG2RAD;
+    wave_q_left_arm_start[6] = 0.0*DEG2RAD;
+    
+    wave_q_head_start.resize(head_joints);
+    wave_q_head_start[0] = -25.0*DEG2RAD;
+    wave_q_head_start[1] = 0.0;
+      
+    // wave 2
+    wave_q_right_arm_end.resize(right_arm_joints);
+    wave_q_right_arm_end[0] = 20.0*DEG2RAD;
+    wave_q_right_arm_end[1] = -80.0*DEG2RAD;
+    wave_q_right_arm_end[2] = -80.0*DEG2RAD;
+    wave_q_right_arm_end[3] = -140.0*DEG2RAD;
+    wave_q_right_arm_end[4] = 0.0*DEG2RAD;
+    wave_q_right_arm_end[5] = 0.0*DEG2RAD;
+    wave_q_right_arm_end[6] = 0.0*DEG2RAD;
+    
+    wave_q_left_arm_end.resize(left_arm_joints);
+    wave_q_left_arm_end[0] = 20.0*DEG2RAD;
+    wave_q_left_arm_end[1] = 80.0*DEG2RAD;
+    wave_q_left_arm_end[2] = 80.0*DEG2RAD;
+    wave_q_left_arm_end[3] = -140.0*DEG2RAD;
+    wave_q_left_arm_end[4] = 0.0*DEG2RAD;
+    wave_q_left_arm_end[5] = 0.0*DEG2RAD;
+    wave_q_left_arm_end[6] = 0.0*DEG2RAD;
+    
+    wave_q_head_end.resize(head_joints);
+    wave_q_head_end[0] = 25.0*DEG2RAD;
+    wave_q_head_end[1] = 0.0;
+    
     //recover pose
     recover_q_right_arm.resize(robot.right_arm.getNumberOfJoints());
     recover_q_left_arm.resize(robot.left_arm.getNumberOfJoints());
@@ -58,6 +113,37 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     recover_q_torso[0] = 0.0;
     recover_q_torso[1] = 0.0;
     recover_q_torso[2] = 0.0;
+    
+    //walking pose
+    walking_q_right_arm.resize(right_arm_joints);
+    walking_q_left_arm.resize(left_arm_joints);
+    walking_q_torso.resize(torso_joints);
+    walking_q_right_leg.resize(right_leg_joints);
+    walking_q_left_leg.resize(left_leg_joints);
+    walking_q_head.resize(head_joints);
+    
+    walking_q_right_arm[0]=60.0*DEG2RAD;
+    walking_q_right_arm[1]=-10.0*DEG2RAD;
+    walking_q_right_arm[2]=20.0*DEG2RAD;
+    walking_q_right_arm[3]=-110.0*DEG2RAD;
+    walking_q_right_arm[4]=0.0*DEG2RAD;
+    walking_q_right_arm[5]=-30.0*DEG2RAD;
+    walking_q_right_arm[6]=50.0*DEG2RAD;
+
+    walking_q_left_arm[0]=60.0*DEG2RAD;
+    walking_q_left_arm[1]=10.0*DEG2RAD;
+    walking_q_left_arm[2]=-20.0*DEG2RAD;
+    walking_q_left_arm[3]=-110.0*DEG2RAD;
+    walking_q_left_arm[4]=0.0*DEG2RAD;
+    walking_q_left_arm[5]=-30.0*DEG2RAD;
+    walking_q_left_arm[6]=-50.0*DEG2RAD;
+    
+    walking_q_torso[0] = 0.0;
+    walking_q_torso[1] = 0.0;
+    walking_q_torso[2] = 0.0;
+    
+    walking_q_head[0] = 0.0;
+    walking_q_head[1] = 0.0;
     
     //driving pose
     drive_q_right_arm.resize(robot.right_arm.getNumberOfJoints());
@@ -128,32 +214,35 @@ bool drc_poses_thread::custom_init()
     status_interface.start();
     status_interface.setStatus( "ready", status_seq_num++ );
 
-    q_input=robot.sensePositionRefFeedback();
+    q_input=joint_sense();
     robot.idynutils.updateiDyn3Model(q_input, false);
     robot.setPositionDirectMode();
-    //robot.head.setPositionDirectMode();
-    //robot.right_arm.setPositionDirectMode();
-    //robot.left_arm.setPositionDirectMode();
-    //robot.left_leg.setPositionDirectMode();
-    //robot.right_leg.setPositionDirectMode();
-    
-    
+
     q_initial = q_input;
     q_desired = q_input;
 
     return true;
 }
 
+yarp::sig::Vector drc_poses_thread::joint_sense()
+{
+    yarp::sig::Vector out(kinematic_joints);
+    
+    yarp::sig::Vector in = robot.sensePositionRefFeedback(); //REAL_ROBOT
+//     yarp::sig::Vector in = robot.sensePosition(); //SIMULATION
+
+    for(int i=0;i<out.size();i++) out[i]=in[i];
+    
+    return out;
+}
+
 void drc_poses_thread::run()
 {
-    q_input=robot.sensePositionRefFeedback();
-    
+    q_input=joint_sense();
+
     yarp::sig::Vector q_torso(3), q_left_arm(7), q_right_arm(7), q_left_leg(6), q_right_leg(6), q_head(2);
     robot.fromIdynToRobot(q_input, q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head);
     
-    //OFFSET 
-    q_left_arm = q_left_arm - left_arm_offset;
-    q_right_arm = q_right_arm - right_arm_offset;
     
     robot.fromRobotToIdyn(q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head, q_input);
 
@@ -172,42 +261,53 @@ void drc_poses_thread::run()
 	{
 	    if(demo_mode)
 	    {
-	        if(last_command=="demo") cmd="demo2";
-		if(last_command=="demo0") cmd="demo1";
-		if(last_command=="demo1") cmd="demo2";
-		if(last_command=="demo2") cmd="demo3";
-		if(last_command=="demo3") cmd="demo4";
-		if(last_command=="demo4") cmd="demo5";
-		if(last_command=="demo5") cmd="demo6";
-		if(last_command=="demo6") cmd="demo7";
-		if(last_command=="demo7") cmd="demo8";
-		if(last_command=="demo8") cmd="demo9";
-		if(last_command=="demo9") cmd="demo10";
-		if(last_command=="demo10") cmd="demo11";
-		if(last_command=="demo11") cmd="demo12";
-		if(last_command=="demo12") cmd="demo13";
-		if(last_command=="demo13") cmd="demo14";
-		if(last_command=="demo14") cmd="demo15";
-		if(last_command=="demo15") cmd="demo16";
-		if(last_command=="demo16") cmd="demo17";
-		if(last_command=="demo17") demo_mode=false;
+            // standard demo
+            if(last_command=="demo") cmd="demo2";
+            if(last_command=="demo0") cmd="demo1";
+            if(last_command=="demo1") cmd="demo2";
+            if(last_command=="demo2") cmd="demo3";
+            if(last_command=="demo3") cmd="demo4";
+            if(last_command=="demo4") cmd="demo5";
+            if(last_command=="demo5") cmd="demo6";
+            if(last_command=="demo6") cmd="demo7";
+            if(last_command=="demo7") cmd="demo8";
+            if(last_command=="demo8") cmd="demo9";
+            if(last_command=="demo9") cmd="demo13"; // NOTE jump to 13
+            if(last_command=="demo10") cmd="demo11";
+            if(last_command=="demo11") cmd="demo12";
+            if(last_command=="demo12") cmd="demo13";
+            if(last_command=="demo13") cmd="demo14";
+            if(last_command=="demo14") cmd="demo15";
+            if(last_command=="demo15") cmd="demo16";
+            if(last_command=="demo16") cmd="demo17";
+            if(last_command=="demo17") demo_mode=false;
+            
+            // 1 HAND 
+            if(last_command=="hello_1") cmd="wave_1";
+            if(last_command=="wave_1") cmd="wave_2";
+            if(last_command=="wave_2") cmd="wave_1";
+
+            // 2 HANDS
+            if(last_command=="hello_2") cmd="wave_2_1";
+            if(last_command=="wave_2_1") cmd="wave_2_2";
+            if(last_command=="wave_2_2") cmd="wave_2_1";
 	    }
 
-	    if(cmd=="demo")
+	    if( (cmd == "hello_1") || (cmd == "hello_2") || (cmd == "demo") )
 	    {
-		demo_mode=true;
+            demo_mode=true;
 	    }
 
 	    last_command=cmd;
 
 	    if(cmd=="help")
 	    {
-		print_help();
+            print_help();
 	    }
 	    else
 	    {
-		err = (std::find(commands.begin(), commands.end(), cmd)!=commands.end())?"":"UNKWOWN";
-		std::cout<<">> Received command ["<<cmd_seq_num<<"]: "<<cmd<<" "<<err<<std::endl;
+        err = (std::find(commands.begin(), commands.end(), cmd)!=commands.end())?"":"UNKWOWN";
+        std::cout<<">> Received command ["<<cmd_seq_num<<"]: "<<cmd<<" "<<err<<std::endl;
 
 		if(err=="")
 		{
@@ -226,7 +326,7 @@ void drc_poses_thread::run()
 			yarp::sig::Vector q_left_leg(robot.left_leg.getNumberOfJoints());
 			yarp::sig::Vector q_head(robot.head.getNumberOfJoints());
 
-			q_in = robot.sensePosition();
+			q_in=joint_sense();
 
 			robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
@@ -236,6 +336,29 @@ void drc_poses_thread::run()
 
 			robot.fromRobotToIdyn(recover_q_right_arm,recover_q_left_arm,recover_q_torso,recover_q_right_leg,recover_q_left_leg,recover_q_head,q);
 			poses["recover"] = q;
+		    }
+		    
+		    if(cmd=="walking") //We don't want to move the legs in this case
+		    {
+			yarp::sig::Vector q(kinematic_joints);
+            yarp::sig::Vector q_in(kinematic_joints);
+            yarp::sig::Vector q_right_arm(right_arm_joints);
+            yarp::sig::Vector q_left_arm(left_arm_joints);
+            yarp::sig::Vector q_torso(torso_joints);
+            yarp::sig::Vector q_right_leg(right_leg_joints);
+            yarp::sig::Vector q_left_leg(left_leg_joints);
+            yarp::sig::Vector q_head(head_joints);
+
+            q_in=joint_sense();
+
+            robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+            walking_q_left_leg = q_left_leg;
+            walking_q_right_leg = q_right_leg;
+            //walking_q_head = q_head;
+
+            robot.fromRobotToIdyn31(walking_q_right_arm,walking_q_left_arm,walking_q_torso,walking_q_right_leg,walking_q_left_leg,walking_q_head,q);
+            poses["walking"] = q;
 		    }
 		    
 		    if(cmd=="driving") //We don't want to move the legs in this case
@@ -249,7 +372,7 @@ void drc_poses_thread::run()
 			yarp::sig::Vector q_left_leg(robot.left_leg.getNumberOfJoints());
 			yarp::sig::Vector q_head(robot.head.getNumberOfJoints());
 
-			q_in = robot.sensePosition();
+			q_in=joint_sense();
 
 			robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
@@ -273,7 +396,7 @@ void drc_poses_thread::run()
 			yarp::sig::Vector q_left_leg(robot.left_leg.getNumberOfJoints());
 			yarp::sig::Vector q_head(robot.head.getNumberOfJoints());
 
-			q_in = robot.sensePosition();
+			q_in=joint_sense();
 
 			robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
@@ -287,6 +410,41 @@ void drc_poses_thread::run()
             robot.right_hand.move(pre_homing_q_right_hand);
 			poses["pre_homing"] = q;
 		    }
+		    
+		    
+                    for (int k=0; k<posesVector.size(); k++) {
+                     if(cmd==posesVector[k].name)
+                      {
+                          yarp::sig::Vector q(kinematic_joints),
+                                            q_in(kinematic_joints),
+                                            q_right_arm(right_arm_joints),
+                                            q_left_arm(left_arm_joints),
+                                            q_torso(torso_joints),
+                                            q_right_leg(right_leg_joints),
+                                            q_left_leg(left_leg_joints),
+                                            q_head(head_joints);
+
+                          q_in=joint_sense();
+
+                          //robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+                          if (posesVector[k].isMoving_right_arm)
+                            q_right_arm = posesVector[k].right_arm;
+                          if (posesVector[k].isMoving_left_arm)
+                            q_left_arm = posesVector[k].left_arm;  
+                          if (posesVector[k].isMoving_torso)
+                            q_torso = posesVector[k].torso;
+                          if (posesVector[k].isMoving_right_leg)
+                            q_right_leg = posesVector[k].right_leg;
+                          if (posesVector[k].isMoving_left_leg)
+                            q_left_leg = posesVector[k].left_leg;
+                          if (posesVector[k].isMoving_head)
+                            q_head = posesVector[k].head;
+                          
+                          //robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+                          poses[posesVector[k].name] = q;
+                      } 
+                    }
 		    
 		    q_desired = poses.at(cmd);
 
@@ -322,9 +480,6 @@ void drc_poses_thread::run()
 
     robot.fromIdynToRobot(q_output, q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head);
     
-    //OFFSET 
-    q_left_arm = q_left_arm + left_arm_offset;
-    q_right_arm = q_right_arm + right_arm_offset;
     
     robot.fromRobotToIdyn(q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head, q_output);
     
@@ -381,8 +536,13 @@ void drc_poses_thread::create_poses()
     
     yarp::sig::Vector q(robot.getNumberOfJoints());
     poses["recover"] = q; //just to have it in the known commands
+    poses["walking"] = q; //just to have it in the known commands
     poses["driving"] = q; //just to have it in the known commands
     poses["pre_homing"] = q; //just to have it in the known commands
+    poses["wave_1"] = q;
+    poses["wave_2"] = q;
+    poses["wave_2_1"] = q;
+    poses["wave_2_2"] = q;
 
     yarp::sig::Vector q_right_arm(robot.right_arm.getNumberOfJoints());
     yarp::sig::Vector q_left_arm(robot.left_arm.getNumberOfJoints());
@@ -778,6 +938,136 @@ void drc_poses_thread::create_poses()
 
     poses["driving_pose"] = q;
 
+    //---------------------- grasp_homing ---------------------
+    q_right_arm.zero();
+    q_left_arm.zero();
+    q_torso.zero();
+    q_right_leg.zero();
+    q_left_leg.zero();
+    q_head.zero();
+
+    q_right_arm[0]=60.0*DEG2RAD;
+    q_right_arm[1]=-10.0*DEG2RAD;
+    q_right_arm[2]=20.0*DEG2RAD;
+    q_right_arm[3]=-110.0*DEG2RAD;
+    q_right_arm[4]=0.0*DEG2RAD;
+    q_right_arm[5]=-30.0*DEG2RAD;
+    q_right_arm[6]=0.0*DEG2RAD;
+
+    q_left_arm[0]=60.0*DEG2RAD;
+    q_left_arm[1]=10.0*DEG2RAD;
+    q_left_arm[2]=-20.0*DEG2RAD;
+    q_left_arm[3]=-110.0*DEG2RAD;
+    q_left_arm[4]=0.0*DEG2RAD;
+    q_left_arm[5]=-30.0*DEG2RAD;
+    q_left_arm[6]=0.0*DEG2RAD;
+
+    q_torso[0] = 0.0;
+    q_torso[1] = 0.0;
+    q_torso[2] = 0.0;
+
+    q_right_leg[0]=2.2*DEG2RAD;
+    q_right_leg[1]=0.15*DEG2RAD;
+    q_right_leg[2]=-17.2*DEG2RAD;
+    q_right_leg[3]=33.2*DEG2RAD;
+    q_right_leg[4]=-16.0*DEG2RAD;
+    q_right_leg[5]=-2.25*DEG2RAD;
+
+    q_left_leg[0]=-2.2*DEG2RAD;
+    q_left_leg[1]=-0.15*DEG2RAD;
+    q_left_leg[2]=-17.2*DEG2RAD;
+    q_left_leg[3]=33.2*DEG2RAD;
+    q_left_leg[4]=-16.0*DEG2RAD;
+    q_left_leg[5]=2.25*DEG2RAD;
+
+    //q_head[0] = 30.0*DEG2RAD; //left
+    q_head[1] = 50.0*DEG2RAD; //down
+
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+
+    poses["grasp_homing"] = q;
+    
+    //---------------------- reach ---------------------
+
+    q_right_arm.zero();
+    q_left_arm.zero();
+    q_torso.zero();
+    q_right_leg.zero();
+    q_left_leg.zero();
+    q_head.zero();
+    q_in.zero();
+    
+    
+    q_in=joint_sense();
+    robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+    q_right_arm[0]=60.0*DEG2RAD;
+    q_right_arm[1]=-10.0*DEG2RAD;
+    q_right_arm[2]=20.0*DEG2RAD;
+    q_right_arm[3]=-110.0*DEG2RAD;
+    q_right_arm[4]=0.0*DEG2RAD;
+    q_right_arm[5]=-30.0*DEG2RAD;
+    q_right_arm[6]=0.0*DEG2RAD;
+
+    q_left_arm[0]=23.0*DEG2RAD;
+    q_left_arm[1]=33.0*DEG2RAD;
+    q_left_arm[2]=-2.0*DEG2RAD;
+    q_left_arm[3]=-93.0*DEG2RAD;
+    q_left_arm[4]=-70.0*DEG2RAD;
+    q_left_arm[5]=14.0*DEG2RAD;
+    q_left_arm[6]=2.0*DEG2RAD;
+    
+    q_torso[0] = 0.0;
+    q_torso[1] = 0.0;
+    q_torso[2] = 0.0;
+    
+    q_head[0] = 30.0*DEG2RAD;
+    q_head[1] = 30.0*DEG2RAD;
+
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+
+    poses["reach"] = q;
+    
+    //---------------------- walk ---------------------
+
+    q_right_arm.zero();
+    q_left_arm.zero();
+    q_torso.zero();
+    q_right_leg.zero();
+    q_left_leg.zero();
+    q_head.zero();
+    q_in.zero();
+    
+    q_in=joint_sense();
+    robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+    q_right_arm[0]=60.0*DEG2RAD;
+    q_right_arm[1]=-10.0*DEG2RAD;
+    q_right_arm[2]=20.0*DEG2RAD;
+    q_right_arm[3]=-110.0*DEG2RAD;
+    q_right_arm[4]=0.0*DEG2RAD;
+    q_right_arm[5]=-30.0*DEG2RAD;
+    q_right_arm[6]=0.0*DEG2RAD;
+
+    q_left_arm[0]=60.0*DEG2RAD;
+    q_left_arm[1]=10.0*DEG2RAD;
+    q_left_arm[2]=-20.0*DEG2RAD;
+    q_left_arm[3]=-110.0*DEG2RAD;
+    q_left_arm[4]=0.0*DEG2RAD;
+    q_left_arm[5]=-30.0*DEG2RAD;
+    q_left_arm[6]=0.0*DEG2RAD;
+    
+    q_torso[0] = 0.0;
+    q_torso[1] = 0.0;
+    q_torso[2] = 0.0;
+    
+    q_head[0] = 0.0*DEG2RAD;
+    q_head[1] = 0.0*DEG2RAD;
+
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+
+    poses["walk"] = q;
+
     //------------------ POSES FOR DEMO ----------------
     //---------------------- demo0 ---------------------
     q_right_arm.zero();
@@ -1100,7 +1390,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo6"] = q;
     
