@@ -26,12 +26,14 @@ struct pose {
     yarp::sig::Vector torso;
     yarp::sig::Vector right_leg;
     yarp::sig::Vector left_leg;
+    yarp::sig::Vector hands;
     bool isMoving_right_arm;
     bool isMoving_left_arm;
     bool isMoving_head;
     bool isMoving_torso;
     bool isMoving_right_leg;
     bool isMoving_left_leg;
+    bool isMoving_hands;
     pose () {
       isMoving_right_arm = false;
       isMoving_left_arm  = false;
@@ -39,6 +41,7 @@ struct pose {
       isMoving_torso     = false;
       isMoving_right_leg = false;
       isMoving_left_leg  = false;
+      isMoving_hands     = false;
     };
 };
 
@@ -121,7 +124,9 @@ private:
     yarp::sig::Vector pre_homing_q_left_hand;
     yarp::sig::Vector pre_homing_q_right_hand;
     
-    int kinematic_joints;
+    yarp::sig::Vector q_hands_desired;
+    
+    int kinematic_joints, actuated_joints;
     int left_arm_joints, right_arm_joints, torso_joints, head_joints, left_leg_joints, right_leg_joints;
     
     yarp::sig::Vector joint_sense();
@@ -153,6 +158,9 @@ public:
      * 
      */
     virtual void run();
+    
+    
+    bool move_hands(double close);
     
 };
 }

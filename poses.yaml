@@ -15,5 +15,66 @@ poses:
  - pose_name : headL10 
    head      : [10, 0]
    
+ - pose_name : headL20 
+   head      : [20, 0]   
+   
  - pose_name : headR10 
    head      : [-10, 0]
+
+ - pose_name : headR20 
+   head      : [-20, 0]
+
+ - pose_name : chair
+   right_arm : [11, -13, 22, -108, -23, 32, -14]
+   left_arm  : [6, 20, -26, -95, 32, 12, -18]
+   right_leg : [-2, 5, -92, 85, 22, 0]
+   left_leg  : [-8, 1, -94, 88, 19, 6]
+   head      : [0, 0]
+   torso     : [-2, 1, 3]
+
+ - pose_name : letter1 #Rise
+   right_arm : [-1, -19, -3, -112, -22, 41, -9]
+   head      : [-10, 0]
+
+ - pose_name : letter2 #Go middle way
+   right_arm : [4, -52, -20, -104, -2, 55, -9]
+   head      : [-40, 0]
+   
+ - pose_name : letter3 #Go above table
+   right_arm : [49, -44, -64, -63, 38, -19, 1]
+   head      : [-80, 10]
+
+ - pose_name : letter4 #Lower
+   right_arm : [44, -35, -65, -61, 51, -13, -6]
+
+ - pose_name : letter5 #Pull
+   right_arm : [51, -24, -73, -67, 51, -29, -6]
+ 
+ - pose_name : letter6 #Rise
+   right_arm : [42, -29, -94, -78, 19, -22, 30]
+    
+ - pose_name : letter7 #Middle way back
+   right_arm : [16, -51, -42, -100, 26, -3, 10]
+   head      : [-40, 0]
+
+ - pose_name : letter8 #Reading position
+   right_arm : [-27, -37, -9, -139, -45, 38, -35]
+   head      : [0, 0]
+   
+ - pose_name : rhand0
+   hands     : [0,0] 
+   
+ - pose_name : rhand25
+   hands     : [0,25]   
+   
+ - pose_name : rhand35
+   hands     : [0,35]   
+   
+ - pose_name : rhand50
+   hands     : [0,50]
+ 
+ - pose_name : rhand75
+   hands     : [0,75]
+   
+ - pose_name : rhand100
+   hands     : [0,100]       
