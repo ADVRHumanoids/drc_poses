@@ -17,3 +17,7 @@ poses:
    
  - pose_name : headR10 
    head      : [-10, 0]
+   
+series:
+ - series_name : ps1
+   poses      : [pose1, pose2, pose1, pose2, headL10, headR10]

@@ -32,6 +32,7 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
 
     create_poses();
     updateCommandList();
+    isInPoseSeriesMode = false;
     
 
     next_time=0.0;
@@ -89,8 +90,8 @@ void drc_poses_thread::run()
 
     if(!busy)
     {
-	std::string cmd, err;
-	if(cmd_interface.getCommand(cmd,cmd_seq_num) || demo_mode)
+	std::string cmd, err="";
+	if(cmd_interface.getCommand(cmd,cmd_seq_num) || demo_mode || isInPoseSeriesMode)
 	{
 	    if(cmd=="help")
 	    {
@@ -111,13 +112,39 @@ void drc_poses_thread::run()
             } else {
                 err = (std::find(commands.begin(), commands.end(), cmd)!=commands.end())?"":"UNKWOWN";
                 std::cout<<">> Received command ["<<cmd_seq_num<<"]: "<<cmd<<" "<<err<<std::endl;
-
-		if(err=="")
+		if(err=="" || isInPoseSeriesMode)
 		{
+            static int asd = 0;
+            cout << asd++ << endl; 
 		    busy=true;
 		    initialized_time = yarp::os::Time::now();
 		    q_initial = q_input;
 		    
+                        for (int k=0; k<allPoseSeries.size(); k++) {
+                            if(cmd==allPoseSeries[k].name)
+                            {
+                                cout << "Pose series: " << cmd << " --- > activated " << endl;
+                                presentPoseSeries = allPoseSeries[k].poses;
+                                isInPoseSeriesMode = true;      
+                            } 
+                        }
+                        
+                        
+                        if (isInPoseSeriesMode) {
+                          if (!presentPoseSeries.empty()) {
+                            cmd = presentPoseSeries.front();
+                            presentPoseSeries.pop_front();
+                            cout << "Executing pose: " << cmd << endl;
+                            if (std::find(commands.begin(), commands.end(), cmd)==commands.end()) {
+                                cout << "Requested command doesn't exist! Series execution stopped!!" << endl;
+                                isInPoseSeriesMode = false;
+                                return;
+                            }
+                          } else {
+                            isInPoseSeriesMode = false;
+                            return;
+                          }
+                        }
                         for (int k=0; k<posesVector.size(); k++) {
                             if(cmd==posesVector[k].name)
                             {
@@ -150,7 +177,7 @@ void drc_poses_thread::run()
                                 robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
                                 poses[posesVector[k].name] = q;
                             } 
-                    }
+                        }
 		    
 		    q_desired = poses.at(cmd);
 
@@ -1673,6 +1700,32 @@ bool drc_poses_thread::loadPoses(std::string yamlFilename)
     posesVector.push_back(tmpPose);
   }
   
+  if (config["series"]) {
+  const YAML::Node& poseSer = config["series"];
+  
+
+  for (std::size_t i = 0; i < poseSer.size(); i++) {
+    poseSeries tmpSeries;
+    const YAML::Node& seriesNode = poseSer[i];
+    if (seriesNode["series_name"]) {
+        cout << "Loading series: " << seriesNode["series_name"].as<std::string>() << endl;
+        tmpSeries.name = seriesNode["series_name"].as<std::string>();
+    }
+    else return false;
+    
+    cout << endl;
+    for (int k=0; k<seriesNode["poses"].size(); k++) {
+        cout << seriesNode["poses"][k].as<string>() << endl;
+        tmpSeries.poses.push_back(seriesNode["poses"][k].as<string>());
+        
+    }    
+    cout << endl;
+    
+    
+    allPoseSeries.push_back(tmpSeries);
+  }
+  }
+  
   return true;
 }
 
@@ -1742,6 +1795,7 @@ void drc_poses_thread::updateCommandList()
   commands.clear();
   for(auto item:poses) commands.push_back(item.first);
   for(auto item:posesVector) commands.push_back(item.name); 
+  for(auto item:allPoseSeries) commands.push_back(item.name); 
 }
 
 

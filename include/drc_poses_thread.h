@@ -42,7 +42,10 @@ struct pose {
     };
 };
 
-
+struct poseSeries {
+    std::string name;
+    std::list<std::string> poses;
+};
   
 /**
  * @brief drc_poses control thread
@@ -78,6 +81,9 @@ private:
     
     //Poses vector to be filled from yaml file
     std::vector<pose> posesVector;
+    std::vector<poseSeries> allPoseSeries;
+    std::list<std::string> presentPoseSeries;
+    bool isInPoseSeriesMode;
 
     bool action_completed();
     void create_poses();
