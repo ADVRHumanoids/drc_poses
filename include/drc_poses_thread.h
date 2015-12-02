@@ -126,6 +126,7 @@ private:
     
     yarp::sig::Vector joint_sense();
     
+    void updateCommandList();
     bool loadPoses(std::string yamlFilename);
     bool savePose(const yarp::sig::Vector &q_in, std::string filename, int poseNumber);
 public:

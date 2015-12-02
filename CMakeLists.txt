@@ -48,6 +48,12 @@ FIND_PACKAGE(GYM REQUIRED)
 FIND_PACKAGE(paramHelp REQUIRED)
 FIND_PACKAGE(trajectory_generator REQUIRED)
 
+#Added to copy the yaml file into the binaries folder
+list(APPEND CMAKE_MODULE_PATH ${YARP_MODULE_PATH})
+include(YarpInstallationHelpers)        
+file(GLOB urdf poses.yaml)
+yarp_install(FILES ${urdf} DESTINATION ${CMAKE_BINARY_DIR})
+
 # add include directories
 INCLUDE_DIRECTORIES(include 
                     ${EIGEN3_INCLUDE_DIR}
