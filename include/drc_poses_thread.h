@@ -121,7 +121,7 @@ private:
     yarp::sig::Vector pre_homing_q_left_hand;
     yarp::sig::Vector pre_homing_q_right_hand;
     
-    int kinematic_joints, actuated_joints;
+    int kinematic_joints;
     int left_arm_joints, right_arm_joints, torso_joints, head_joints, left_leg_joints, right_leg_joints;
     
     yarp::sig::Vector joint_sense();
