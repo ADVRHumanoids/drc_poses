@@ -30,6 +30,7 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
 
     create_poses();
     for(auto item:poses) commands.push_back(item.first);
+    for(auto item:posesVector) commands.push_back(item.name);
 
     next_time=0.0;
     final_time=Min_Texe;   //devel_JLee
