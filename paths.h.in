@@ -1,0 +1,2 @@
+
+#cmakedefine BUILD_PATH "@BUILD_PATH@"
