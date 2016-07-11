@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
     yarp::os::ResourceFinder rf;
     rf.setVerbose(true);
 
-    rf.setDefaultConfigFile( "config.ini" ); 
+    rf.setDefaultConfigFile( "robotology_config.ini" ); 
     rf.setDefaultContext( "drc_poses" );  
     rf.configure(argc, argv);
     drc_poses_module drc_poses_mod = drc_poses_module( argc, argv, "drc_poses", MODULE_PERIOD, rf );
