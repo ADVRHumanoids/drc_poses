@@ -34,11 +34,18 @@ using namespace std;
 
 bool drc_poses_thread::move_hands(double close)
 {   
-  if (close <= 1.0 && close >= 0.0)
+    return move_hands(close, close);
+}
+
+bool drc_poses_thread::move_hands(double left_fraction, double right_fraction)
+{   
+  if (left_fraction <= 1.0 && left_fraction >= 0.0 && right_fraction <= 1.0 && right_fraction >= 0.0) 
   {
-      q_hands_desired[1]  = MIN_CLOSURE + close*(MAX_CLOSURE - MIN_CLOSURE); 
-      q_hands_desired[0] = MIN_CLOSURE + close*(MAX_CLOSURE - MIN_CLOSURE);
-      robot.moveHands(q_hands_desired[1], q_hands_desired[0]);
+      yarp::sig::Vector q_right_hand(1), q_left_hand(1);
+      q_right_hand[0]  = MIN_CLOSURE + right_fraction*(MAX_CLOSURE - MIN_CLOSURE); 
+      q_left_hand[0]   = MIN_CLOSURE + left_fraction* (MAX_CLOSURE - MIN_CLOSURE);
+      robot.left_hand.move(q_left_hand); 
+      robot.right_hand.move(q_right_hand); 
       return true;
   }
   else
@@ -635,10 +642,7 @@ void drc_poses_thread::run()
                             
                             if(posesVector[k].isMoving_hands) {
                                 cout << "Moving hands to " << posesVector[k].hands(0) << " " << posesVector[k].hands(1) << endl;
-                                q_hands_desired[0]  = MIN_CLOSURE + posesVector[k].hands(0)*(MAX_CLOSURE - MIN_CLOSURE); 
-                                q_hands_desired[1]  = MIN_CLOSURE + posesVector[k].hands(1)*(MAX_CLOSURE - MIN_CLOSURE);
-                                robot.moveHands(q_hands_desired[0], q_hands_desired[1]);
-                                /*robot.moveHands(posesVector[k].hands);                  */              
+                                move_hands(posesVector[k].hands(0), posesVector[k].hands(1));
                             }
                         } 
                     }

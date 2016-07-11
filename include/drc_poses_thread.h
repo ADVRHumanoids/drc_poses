@@ -181,6 +181,7 @@ public:
     
     
     bool move_hands(double close);
+    bool move_hands(double left_percent, double right_percent);
     
 };
 }
