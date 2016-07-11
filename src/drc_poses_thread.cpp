@@ -16,6 +16,7 @@
 
 #include "drc_poses_thread.h"
 #include "drc_poses_constants.h"
+#include "paths.h"
 
 using namespace walkman::drc::poses;
 using namespace yarp::math;
@@ -47,18 +48,23 @@ bool drc_poses_thread::move_hands(double close)
    return false;
 }
 
+double left_offset[7] = {-0.001878101, -0.087266425, -0.00541460025, -0.04116454775, -0.0270602895, 0.05685963075, 0.05985226625};
+double right_offset[7] = {0.00496249625, 0.01221735225, 0.023223271, -0.01633125525, -0.04591635675, 0.0131223505, -0.0860596935};
+yarp::sig::Vector left_arm_offset(7,left_offset);
+yarp::sig::Vector right_arm_offset(7,right_offset);
+
 
 drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::ResourceFinder rf, std::shared_ptr< paramHelp::ParamHelperServer > ph)
 :control_thread( module_prefix, rf, ph ), cmd_interface(module_prefix), status_interface(module_prefix)
 {
-    kinematic_joints = robot.getNumberOfKinematicJoints();
-    actuated_joints = robot.getNumberOfActuatedJoints();
-    right_arm_joints = 7;
-    left_arm_joints = 7;
-    torso_joints = 3;
-    right_leg_joints = 6;
-    left_leg_joints = 6;
-    head_joints = 2;
+    kinematic_joints = robot.getNumberOfJoints();
+    actuated_joints  = robot.getNumberOfJoints();
+    right_arm_joints = robot.right_arm.getNumberOfJoints();
+    left_arm_joints  = robot.left_arm.getNumberOfJoints();
+    torso_joints     = robot.torso.getNumberOfJoints();
+    right_leg_joints = robot.right_leg.getNumberOfJoints();
+    left_leg_joints  = robot.left_leg.getNumberOfJoints();
+    head_joints      = robot.head.getNumberOfJoints();
   
     std::string yamlPath = BUILD_PATH;
     yamlPath += "/poses.yaml";
@@ -137,21 +143,21 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     recover_q_left_leg.resize(left_leg_joints);
     recover_q_head.resize(head_joints);
     
-    recover_q_right_arm[0]=0.75;
-    recover_q_right_arm[1]=-0.3;
-    recover_q_right_arm[2]=-0.2;
-    recover_q_right_arm[3]=-1.05;
-    recover_q_right_arm[4]=0.0;
-    recover_q_right_arm[5]=0.0;
-    recover_q_right_arm[6]=0.0;
+    recover_q_right_arm[0]=60.0*DEG2RAD;
+    recover_q_right_arm[1]=-10.0*DEG2RAD;
+    recover_q_right_arm[2]=20.0*DEG2RAD;
+    recover_q_right_arm[3]=-110.0*DEG2RAD;
+    recover_q_right_arm[4]=0.0*DEG2RAD;
+    recover_q_right_arm[5]=-30.0*DEG2RAD;
+    recover_q_right_arm[6]=0.0*DEG2RAD;
 
-    recover_q_left_arm[0]=0.75;
-    recover_q_left_arm[1]=0.3;
-    recover_q_left_arm[2]=0.2;
-    recover_q_left_arm[3]=-1.05;
-    recover_q_left_arm[4]=0.0;
-    recover_q_left_arm[5]=0.0;
-    recover_q_left_arm[6]=0.0;
+    recover_q_left_arm[0]=60.0*DEG2RAD;
+    recover_q_left_arm[1]=10.0*DEG2RAD;
+    recover_q_left_arm[2]=-20.0*DEG2RAD;
+    recover_q_left_arm[3]=-110.0*DEG2RAD;
+    recover_q_left_arm[4]=0.0*DEG2RAD;
+    recover_q_left_arm[5]=-30.0*DEG2RAD;
+    recover_q_left_arm[6]=0.0*DEG2RAD;
     
     recover_q_torso[0] = 0.0;
     recover_q_torso[1] = 0.0;
@@ -284,9 +290,13 @@ void drc_poses_thread::run()
     q_input=joint_sense();
 
     yarp::sig::Vector q_torso(3), q_left_arm(7), q_right_arm(7), q_left_leg(6), q_right_leg(6), q_head(2);
-    robot.fromIdynToRobot31(q_input, q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head);
+    robot.fromIdynToRobot(q_input, q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head);
     
-    robot.fromRobotToIdyn31(q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head, q_input);
+    //OFFSET 
+    q_left_arm = q_left_arm - left_arm_offset;
+    q_right_arm = q_right_arm - right_arm_offset;
+    
+    robot.fromRobotToIdyn(q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head, q_input);
 
     robot.idynutils.updateiDyn3Model( q_input, false );
 
@@ -388,13 +398,13 @@ void drc_poses_thread::run()
 
 			q_in=joint_sense();
 
-			robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+			robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
 			recover_q_left_leg = q_left_leg;
 			recover_q_right_leg = q_right_leg;
 			recover_q_head = q_head;
 
-			robot.fromRobotToIdyn31(recover_q_right_arm,recover_q_left_arm,recover_q_torso,recover_q_right_leg,recover_q_left_leg,recover_q_head,q);
+			robot.fromRobotToIdyn(recover_q_right_arm,recover_q_left_arm,recover_q_torso,recover_q_right_leg,recover_q_left_leg,recover_q_head,q);
 			poses["recover"] = q;
 		    }
 		    
@@ -411,13 +421,13 @@ void drc_poses_thread::run()
 
             q_in=joint_sense();
 
-            robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+            robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
             walking_q_left_leg = q_left_leg;
             walking_q_right_leg = q_right_leg;
             //walking_q_head = q_head;
 
-            robot.fromRobotToIdyn31(walking_q_right_arm,walking_q_left_arm,walking_q_torso,walking_q_right_leg,walking_q_left_leg,walking_q_head,q);
+            robot.fromRobotToIdyn(walking_q_right_arm,walking_q_left_arm,walking_q_torso,walking_q_right_leg,walking_q_left_leg,walking_q_head,q);
             poses["walking"] = q;
 		    }
 		    
@@ -434,14 +444,14 @@ void drc_poses_thread::run()
 
 			q_in=joint_sense();
 
-			robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+			robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
 			drive_q_left_leg = q_left_leg;
 			drive_q_right_leg = q_right_leg;
 			drive_q_head = q_head;
 			drive_q_right_arm = q_right_arm;
 
-			robot.fromRobotToIdyn31(drive_q_right_arm,drive_q_left_arm,drive_q_torso,drive_q_right_leg,drive_q_left_leg,drive_q_head,q);
+			robot.fromRobotToIdyn(drive_q_right_arm,drive_q_left_arm,drive_q_torso,drive_q_right_leg,drive_q_left_leg,drive_q_head,q);
 			poses["driving"] = q;
 		    }
 
@@ -458,18 +468,16 @@ void drc_poses_thread::run()
 
 			q_in=joint_sense();
 
-			robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+			robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
 			q_left_leg[0] = pre_homing_q_left_leg[0];
 			pre_homing_q_left_leg = q_left_leg;
 			q_right_leg[0] = pre_homing_q_right_leg[0];
 			pre_homing_q_right_leg = q_right_leg;
 
-			robot.fromRobotToIdyn31(pre_homing_q_right_arm,pre_homing_q_left_arm,pre_homing_q_torso,pre_homing_q_right_leg,pre_homing_q_left_leg,pre_homing_q_head,q);
-			yarp::sig::Vector hands(2);
-			hands[0]=pre_homing_q_right_hand[0];
-			hands[1]=pre_homing_q_left_hand[0];
-			robot.moveHands(hands);
+			robot.fromRobotToIdyn(pre_homing_q_right_arm,pre_homing_q_left_arm,pre_homing_q_torso,pre_homing_q_right_leg,pre_homing_q_left_leg,pre_homing_q_head,q);
+            robot.left_hand.move(pre_homing_q_left_hand);
+            robot.right_hand.move(pre_homing_q_right_hand);
 			poses["pre_homing"] = q;
 		    }
 		    
@@ -487,13 +495,13 @@ void drc_poses_thread::run()
 
 			q_in=joint_sense();
 
-			robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+			robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
 			q_left_arm = wave_q_left_arm_start;
                         q_head = wave_q_head_start;
 			//q_torso = wave_q_torso_start;
 
-			robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+			robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 			poses["wave_1"] = q;
 		    }
 		    // HELLO 1 HAND end
@@ -510,12 +518,12 @@ void drc_poses_thread::run()
 
 			q_in=joint_sense();
 
-			robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+			robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
 			q_left_arm = wave_q_left_arm_end;
                         q_head = wave_q_head_end;
 
-			robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+			robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 			poses["wave_2"] = q;
 		    }
 		    
@@ -533,14 +541,14 @@ void drc_poses_thread::run()
 
                         q_in=joint_sense();
 
-                        robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+                        robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
                         q_right_arm = wave_q_right_arm_start;
                         q_left_arm = wave_q_left_arm_start;
                         q_head = wave_q_head_start;
                         //q_torso = wave_q_torso_start;
 
-                        robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+                        robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
                         poses["wave_2_1"] = q;
                     }
                     // HELLO 2 HANDS end
@@ -557,13 +565,13 @@ void drc_poses_thread::run()
 
                         q_in=joint_sense();
 
-                        robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+                        robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
                         q_right_arm = wave_q_right_arm_end;
                         q_left_arm = wave_q_left_arm_end;
                         q_head = wave_q_head_end;
 
-                        robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+                        robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
                         poses["wave_2_2"] = q;
                     }
 
@@ -607,7 +615,7 @@ void drc_poses_thread::run()
 
                             q_in=joint_sense();
 
-                            robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+                            robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
                             if (posesVector[k].isMoving_right_arm)
                                 q_right_arm = posesVector[k].right_arm;
@@ -622,7 +630,7 @@ void drc_poses_thread::run()
                             if (posesVector[k].isMoving_head)
                                 q_head = posesVector[k].head;
                             
-                            robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+                            robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
                             poses[posesVector[k].name] = q;
                             
                             if(posesVector[k].isMoving_hands) {
@@ -667,14 +675,15 @@ void drc_poses_thread::run()
 
     q_output = q_initial + delta_q;
 
-    robot.fromIdynToRobot31(q_output, q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head);
-        
-    yarp::sig::Vector q_move(actuated_joints);
-//     q_move.resize(31);
-    robot.fromRobotToIdyn29(q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_move);
-
-    robot.move29(q_move);
-    robot.moveNeck(q_head[0], q_head[1]);
+    robot.fromIdynToRobot(q_output, q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head);
+    
+    //OFFSET 
+    q_left_arm = q_left_arm + left_arm_offset;
+    q_right_arm = q_right_arm + right_arm_offset;
+    
+    robot.fromRobotToIdyn(q_right_arm, q_left_arm, q_torso, q_right_leg, q_left_leg, q_head, q_output);
+    
+    robot.move(q_output);
 }
 
 yarp::sig::Vector drc_poses_thread::compute_delta_q()
@@ -785,7 +794,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-16.0*DEG2RAD;
     q_left_leg[5]=2.25*DEG2RAD;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["homing"] = q;
     
@@ -801,7 +810,7 @@ void drc_poses_thread::create_poses()
     
     q_left_arm[1]=0.15;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["stand"] = q;
     
@@ -847,7 +856,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["homing_guard"] = q;
     
@@ -893,7 +902,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["homing_guard_left"] = q;
     
@@ -939,7 +948,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["homing_guard_right"] = q;
     
@@ -985,7 +994,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.87;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["lower"] = q;
 
@@ -1031,7 +1040,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-1.17;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["squat"] = q;
     
@@ -1077,7 +1086,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-1.17;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["debris"] = q;
 
@@ -1126,7 +1135,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-30*DEG2RAD;
     q_left_leg[5]=-0.5*DEG2RAD;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["driving_pose"] = q;
 
@@ -1175,7 +1184,7 @@ void drc_poses_thread::create_poses()
     //q_head[0] = 30.0*DEG2RAD; //left
     q_head[1] = 50.0*DEG2RAD; //down
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["grasp_homing"] = q;
     
@@ -1191,7 +1200,7 @@ void drc_poses_thread::create_poses()
     
     
     q_in=joint_sense();
-    robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+    robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
     q_right_arm[0]=60.0*DEG2RAD;
     q_right_arm[1]=-10.0*DEG2RAD;
@@ -1216,7 +1225,7 @@ void drc_poses_thread::create_poses()
     q_head[0] = 30.0*DEG2RAD;
     q_head[1] = 30.0*DEG2RAD;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["reach"] = q;
     
@@ -1231,7 +1240,7 @@ void drc_poses_thread::create_poses()
     q_in.zero();
     
     q_in=joint_sense();
-    robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+    robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
     q_right_arm[0]=60.0*DEG2RAD;
     q_right_arm[1]=-10.0*DEG2RAD;
@@ -1256,7 +1265,7 @@ void drc_poses_thread::create_poses()
     q_head[0] = 0.0*DEG2RAD;
     q_head[1] = 0.0*DEG2RAD;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["walk"] = q;
 
@@ -1303,7 +1312,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo0"] = q;
     
@@ -1349,7 +1358,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.87;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo1"] = q;
     
@@ -1395,7 +1404,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo2"] = q;
     
@@ -1441,7 +1450,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo3"] = q;
     
@@ -1487,7 +1496,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo4"] = q;
     
@@ -1533,7 +1542,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo5"] = q;
     
@@ -1582,7 +1591,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo6"] = q;
     
@@ -1631,7 +1640,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo7"] = q;
     
@@ -1680,7 +1689,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo8"] = q;
     
@@ -1726,7 +1735,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo9"] = q;    
     
@@ -1772,7 +1781,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo10"] = q;    
     
@@ -1818,7 +1827,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo11"] = q;   
     
@@ -1864,7 +1873,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo12"] = q;   
     
@@ -1910,7 +1919,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo13"] = q;
     
@@ -1958,7 +1967,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo14"] = q;
     
@@ -2006,7 +2015,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo15"] = q;
   
@@ -2052,7 +2061,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo16"] = q;    
     
@@ -2098,7 +2107,7 @@ void drc_poses_thread::create_poses()
     q_left_leg[4]=-0.3;
     q_left_leg[5]=0.0;
 
-    robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+    robot.fromRobotToIdyn(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
 
     poses["demo17"] = q;        
 }
@@ -2210,7 +2219,7 @@ bool drc_poses_thread::savePose(const yarp::sig::Vector &q_in, std::string filen
     yarp::sig::Vector q_head(head_joints);
 
 
-  robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+  robot.fromIdynToRobot(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
 
   ofstream myfile;
   myfile.open (filename.c_str(), ios::app | ios::out);
