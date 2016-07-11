@@ -21,12 +21,49 @@
 #include <trajectory_generator/trajectory_generator.h>
 #include "drc_shared/module_statuses/drc_poses_statuses.h"
 
+
+#include "yaml-cpp/yaml.h"
+#include <vector>
+
 namespace walkman
 {
 namespace drc
 {
 namespace poses
 {
+  
+struct pose {
+    std::string name;
+    yarp::sig::Vector right_arm;
+    yarp::sig::Vector left_arm;
+    yarp::sig::Vector head;
+    yarp::sig::Vector torso;
+    yarp::sig::Vector right_leg;
+    yarp::sig::Vector left_leg;
+    yarp::sig::Vector hands;
+    bool isMoving_right_arm;
+    bool isMoving_left_arm;
+    bool isMoving_head;
+    bool isMoving_torso;
+    bool isMoving_right_leg;
+    bool isMoving_left_leg;
+    bool isMoving_hands;
+    pose () {
+      isMoving_right_arm = false;
+      isMoving_left_arm  = false;
+      isMoving_head      = false;
+      isMoving_torso     = false;
+      isMoving_right_leg = false;
+      isMoving_left_leg  = false;
+      isMoving_hands     = false;
+    };
+};
+
+struct poseSeries {
+    std::string name;
+    std::list<std::string> poses;
+};
+  
 /**
  * @brief drc_poses control thread
  * 
@@ -58,6 +95,12 @@ private:
     yarp::sig::Vector q_desired;
     std::string last_command;
     bool demo_mode=false;
+    
+    //Poses vector to be filled from yaml file
+    std::vector<pose> posesVector;
+    std::vector<poseSeries> allPoseSeries;
+    std::list<std::string> presentPoseSeries;
+    bool isInPoseSeriesMode;
 
     bool action_completed();
     void create_poses();
@@ -101,10 +144,16 @@ private:
     yarp::sig::Vector pre_homing_q_left_hand;
     yarp::sig::Vector pre_homing_q_right_hand;
     
+    yarp::sig::Vector q_hands_desired;
+    
     int kinematic_joints, actuated_joints;
     int left_arm_joints, right_arm_joints, torso_joints, head_joints, left_leg_joints, right_leg_joints;
     
     yarp::sig::Vector joint_sense();
+    
+    void updateCommandList();
+    bool loadPoses(std::string yamlFilename);
+    bool savePose(const yarp::sig::Vector &q_in, std::string filename, int poseNumber);
 public:
     
     /**
@@ -129,6 +178,9 @@ public:
      * 
      */
     virtual void run();
+    
+    
+    bool move_hands(double close);
     
 };
 }

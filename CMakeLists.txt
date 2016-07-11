@@ -1,3 +1,4 @@
+
 # 
 #  Copyright (C) 2014 Walkman
 #  Author: Alessandro Settimi
@@ -47,6 +48,15 @@ FIND_PACKAGE(GYM REQUIRED)
 FIND_PACKAGE(paramHelp REQUIRED)
 FIND_PACKAGE(trajectory_generator REQUIRED)
 
+#Added to copy the yaml file into the binaries folder
+list(APPEND CMAKE_MODULE_PATH ${YARP_MODULE_PATH})
+include(YarpInstallationHelpers)        
+file(GLOB urdf poses.yaml)
+yarp_install(FILES ${urdf} DESTINATION ${CMAKE_BINARY_DIR})
+
+set(BUILD_PATH "${CMAKE_CURRENT_BINARY_DIR}") 
+configure_file(paths.h.in paths.h @ONLY)
+
 # add include directories
 INCLUDE_DIRECTORIES(include 
                     ${EIGEN3_INCLUDE_DIR}
@@ -54,6 +64,7 @@ INCLUDE_DIRECTORIES(include
 		    ${idynutils_INCLUDE_DIRS}
 		    ${GYM_INCLUDE_DIRS}
 		    ${trajectory_generator_INCLUDE_DIRS}
+		    ${CMAKE_CURRENT_BINARY_DIR} #added to be able to access paths.h
 		    )
 		    
 ADD_EXECUTABLE(${PROJECT_NAME} src/drc_poses_main.cpp 
@@ -65,6 +76,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${iDynTree_LIBRARIES}
 				      ${idynutils_LIBRARIES}
 				      ${GYM_LIBRARIES}
 				      ${trajectory_generator_LIBRARIES}
+				      yaml-cpp
 				      )
 
 add_subdirectory(app)

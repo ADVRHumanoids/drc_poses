@@ -19,12 +19,34 @@
 
 using namespace walkman::drc::poses;
 using namespace yarp::math;
+using namespace std;
 
 #define Max_Vel         0.5 // maximum joint velocity [rad/s]
 #define Min_Texe        2.0 // minimum execution time for homing [sec]
 
 #define RAD2DEG    (180.0/M_PI)
 #define DEG2RAD    (M_PI/180.0)
+#define PI         3.14
+
+#define MIN_CLOSURE 0.0 * DEG2RAD
+#define MAX_CLOSURE 600.0 * DEG2RAD
+
+bool drc_poses_thread::move_hands(double close)
+{   
+  if (close <= 1.0 && close >= 0.0)
+  {
+      q_hands_desired[1]  = MIN_CLOSURE + close*(MAX_CLOSURE - MIN_CLOSURE); 
+      q_hands_desired[0] = MIN_CLOSURE + close*(MAX_CLOSURE - MIN_CLOSURE);
+      robot.moveHands(q_hands_desired[1], q_hands_desired[0]);
+      return true;
+  }
+  else
+  {
+      std::cout<<"closing amount is out of feasible bounds"<<std::endl;
+  }
+   return false;
+}
+
 
 drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::ResourceFinder rf, std::shared_ptr< paramHelp::ParamHelperServer > ph)
 :control_thread( module_prefix, rf, ph ), cmd_interface(module_prefix), status_interface(module_prefix)
@@ -38,14 +60,20 @@ drc_poses_thread::drc_poses_thread( std::string module_prefix, yarp::os::Resourc
     left_leg_joints = 6;
     head_joints = 2;
   
+    std::string yamlPath = BUILD_PATH;
+    yamlPath += "/poses.yaml";
+    loadPoses(yamlPath);
     q_input.resize(kinematic_joints);
     delta_q.resize(kinematic_joints);
     q_output.resize(kinematic_joints);
 
     create_poses();
-    for(auto item:poses) commands.push_back(item.first);
-    for(auto item:posesVector) commands.push_back(item.name);
-
+    updateCommandList();
+    isInPoseSeriesMode = false;
+    
+    q_hands_desired.resize(2);
+    
+    
     next_time=0.0;
     final_time=Min_Texe;   //devel_JLee
     
@@ -270,8 +298,8 @@ void drc_poses_thread::run()
 
     if(!busy)
     {
-	std::string cmd, err;
-	if(cmd_interface.getCommand(cmd,cmd_seq_num) || demo_mode)
+	std::string cmd, err="";
+	if(cmd_interface.getCommand(cmd,cmd_seq_num) || demo_mode || isInPoseSeriesMode)
 	{
 	    if(demo_mode)
 	    {
@@ -318,12 +346,30 @@ void drc_poses_thread::run()
 	    {
             print_help();
 	    }
-	    else
-	    {
+	    else if (cmd=="reloadYAML") {
+            cout << "Reloading YAML poses file " << endl;
+            std::string yamlPath = BUILD_PATH;
+            yamlPath += "/poses.yaml";
+            loadPoses(yamlPath);
+            updateCommandList();
+        } else if (cmd=="savePose") {
+            static int poseCounter=0; 
+            cout << "Saving pose to YAML file " << endl;
+
+            yarp::sig::Vector q_in(kinematic_joints), tmp;
+
+            tmp = robot.sensePosition(); //REAL_ROBOT
+            for(int i=0;i<q_in.size();i++) q_in[i]=tmp[i];
+            std::string yamlPath = BUILD_PATH;
+            yamlPath += "/posesOut.yaml";
+            
+            savePose(q_in, yamlPath, poseCounter);
+            poseCounter++;
+        } else {
         err = (std::find(commands.begin(), commands.end(), cmd)!=commands.end())?"":"UNKWOWN";
         std::cout<<">> Received command ["<<cmd_seq_num<<"]: "<<cmd<<" "<<err<<std::endl;
 
-		if(err=="")
+		if(err=="" || isInPoseSeriesMode)
 		{
 		    busy=true;
 		    initialized_time = yarp::os::Time::now();
@@ -519,6 +565,74 @@ void drc_poses_thread::run()
 
                         robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
                         poses["wave_2_2"] = q;
+                    }
+
+					for (int k=0; k<allPoseSeries.size(); k++) {
+                            if(cmd==allPoseSeries[k].name)
+                            {
+                                cout << "Pose series: " << cmd << " --- > activated " << endl;
+                                presentPoseSeries = allPoseSeries[k].poses;
+                                isInPoseSeriesMode = true;      
+                            } 
+                        }
+                        
+                        
+                        if (isInPoseSeriesMode) {
+                          if (!presentPoseSeries.empty()) {
+                            cmd = presentPoseSeries.front();
+                            presentPoseSeries.pop_front();
+                            cout << "Executing pose: " << cmd << endl;
+                            if (std::find(commands.begin(), commands.end(), cmd)==commands.end()) {
+                                cout << "Requested command doesn't exist! Series execution stopped!!" << endl;
+                                isInPoseSeriesMode = false;
+                                return;
+                            }
+                          } else {
+                            isInPoseSeriesMode = false;
+                            return;
+                          }
+                        }
+
+                    for (int k=0; k<posesVector.size(); k++) {
+                        if(cmd==posesVector[k].name)
+                        {
+                            yarp::sig::Vector q(kinematic_joints);
+                            yarp::sig::Vector q_in(kinematic_joints);
+                            yarp::sig::Vector q_right_arm(right_arm_joints);
+                            yarp::sig::Vector q_left_arm(left_arm_joints);
+                            yarp::sig::Vector q_torso(torso_joints);
+                            yarp::sig::Vector q_right_leg(right_leg_joints);
+                            yarp::sig::Vector q_left_leg(left_leg_joints);
+                            yarp::sig::Vector q_head(head_joints);
+
+                            q_in=joint_sense();
+
+                            robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+                            if (posesVector[k].isMoving_right_arm)
+                                q_right_arm = posesVector[k].right_arm;
+                            if (posesVector[k].isMoving_left_arm)
+                                q_left_arm = posesVector[k].left_arm;  
+                            if (posesVector[k].isMoving_torso)
+                                q_torso = posesVector[k].torso;
+                            if (posesVector[k].isMoving_right_leg)
+                                q_right_leg = posesVector[k].right_leg;
+                            if (posesVector[k].isMoving_left_leg)
+                                q_left_leg = posesVector[k].left_leg;
+                            if (posesVector[k].isMoving_head)
+                                q_head = posesVector[k].head;
+                            
+                            robot.fromRobotToIdyn31(q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head,q);
+                            poses[posesVector[k].name] = q;
+                            
+                            if(posesVector[k].isMoving_hands) {
+                                cout << "Moving hands to " << posesVector[k].hands(0) << " " << posesVector[k].hands(1) << endl;
+                                q_hands_desired[0]  = MIN_CLOSURE + posesVector[k].hands(0)*(MAX_CLOSURE - MIN_CLOSURE); 
+                                q_hands_desired[1]  = MIN_CLOSURE + posesVector[k].hands(1)*(MAX_CLOSURE - MIN_CLOSURE);
+                                robot.moveHands(q_hands_desired[0], q_hands_desired[1]);
+                                /*robot.moveHands(posesVector[k].hands);                  */              
+                            }
+                        } 
                     }
 		    
 		    q_desired = poses.at(cmd);
@@ -1988,3 +2102,169 @@ void drc_poses_thread::create_poses()
 
     poses["demo17"] = q;        
 }
+
+bool readYAML(yarp::sig::Vector &out, YAML::Node node)
+{
+  if (!node) return false;
+  
+  int size = node.size();
+  if (size == 0) return false;
+  out.resize(size);
+  for (int i=0; i<size; i++) {
+    out(i) = node[i].as<double>() * DEG2RAD;
+    cout << out(i) << " ";
+  }
+  cout << endl;
+  return true;
+}
+
+bool drc_poses_thread::loadPoses(std::string yamlFilename)
+{
+  cout << "Reading yaml file at: " << yamlFilename.c_str() << endl;
+  posesVector.clear(); 
+  
+  YAML::Node config = YAML::LoadFile(yamlFilename.c_str());
+  const YAML::Node& poses = config["poses"];
+  
+  for (std::size_t i = 0; i < poses.size(); i++) {
+    pose tmpPose;
+    const YAML::Node& poseNode = poses[i];
+    if (poseNode["pose_name"]) {
+        cout << poseNode["pose_name"].as<std::string>() << endl;
+        tmpPose.name = poseNode["pose_name"].as<std::string>();
+    }
+    else return false;
+    
+    if (readYAML(tmpPose.right_arm, poseNode["right_arm"])) tmpPose.isMoving_right_arm = true;
+    else cout << "right_arm is not present." << endl;
+    
+    if (readYAML(tmpPose.left_arm, poseNode["left_arm"])) tmpPose.isMoving_left_arm = true;
+    else cout << "left_arm is not present." << endl;
+    
+    if (readYAML(tmpPose.right_leg, poseNode["right_leg"])) tmpPose.isMoving_right_leg = true;
+    else cout << "right_leg is not present." << endl;
+    
+    if (readYAML(tmpPose.left_leg, poseNode["left_leg"])) tmpPose.isMoving_left_leg = true;
+    else cout << "left_leg is not present." << endl;
+    
+    if (readYAML(tmpPose.torso, poseNode["torso"])) tmpPose.isMoving_torso = true;
+    else cout << "torso is not present." << endl;
+
+    if (readYAML(tmpPose.head, poseNode["head"])) tmpPose.isMoving_head = true;
+    else cout << "head is not present." << endl;
+    
+    if (poseNode["hands"]){
+        if (poseNode["hands"].size() == 2) { //Make sure there is a reference for left and right hand
+            tmpPose.isMoving_hands = true;
+            tmpPose.hands.resize(2);
+            tmpPose.hands(0) = poseNode["hands"][0].as<double>()/100.0;
+            tmpPose.hands(1) = poseNode["hands"][1].as<double>()/100.0;
+            
+            cout << "Hands: " << tmpPose.hands(0) << " " << tmpPose.hands(1) << endl;
+        }
+    }
+    else cout << "Hands are not present." << endl;
+    
+    posesVector.push_back(tmpPose);
+  }
+  
+  if (config["series"]) {
+    const YAML::Node& poseSer = config["series"];
+    allPoseSeries.clear();
+
+    for (std::size_t i = 0; i < poseSer.size(); i++) {
+        poseSeries tmpSeries;
+        const YAML::Node& seriesNode = poseSer[i];
+        if (seriesNode["series_name"]) {
+            cout << "Loading series: " << seriesNode["series_name"].as<std::string>() << endl;
+            tmpSeries.name = seriesNode["series_name"].as<std::string>();
+        }
+        else return false;
+        
+        cout << endl;
+        for (int k=0; k<seriesNode["poses"].size(); k++) {
+            cout << seriesNode["poses"][k].as<string>() << endl;
+            tmpSeries.poses.push_back(seriesNode["poses"][k].as<string>());
+            
+        }    
+        cout << endl;
+        
+        
+        allPoseSeries.push_back(tmpSeries);
+    }
+  }
+  
+  return true;
+}
+
+
+bool drc_poses_thread::savePose(const yarp::sig::Vector &q_in, std::string filename, int poseNumber)
+{
+  cout << "Saving data to file: " << filename.c_str() << endl;
+  
+    yarp::sig::Vector q_right_arm(right_arm_joints);
+    yarp::sig::Vector q_left_arm(left_arm_joints);
+    yarp::sig::Vector q_torso(torso_joints);
+    yarp::sig::Vector q_right_leg(right_leg_joints);
+    yarp::sig::Vector q_left_leg(left_leg_joints);
+    yarp::sig::Vector q_head(head_joints);
+
+
+  robot.fromIdynToRobot31(q_in,q_right_arm,q_left_arm,q_torso,q_right_leg,q_left_leg,q_head);
+
+  ofstream myfile;
+  myfile.open (filename.c_str(), ios::app | ios::out);
+  myfile << " - pose_name : savedPose" << poseNumber << endl;
+  
+  myfile << "   right_arm : [";
+  for (int i=0; i<q_right_arm.size()-1; i++) {
+      myfile << round(q_right_arm(i)/PI*180) << ", ";
+  }
+  myfile << round(q_right_arm(q_right_arm.size()-1)/PI*180) << "]" << endl;
+  
+  myfile << "   left_arm  : [";
+  for (int i=0; i<q_left_arm.size()-1; i++) {
+      myfile << round(q_left_arm(i)/PI*180) << ", ";
+  }
+  myfile << round(q_left_arm(q_left_arm.size()-1)/PI*180) << "]" << endl;
+  
+  myfile << "   right_leg : [";
+  for (int i=0; i<q_right_leg.size()-1; i++) {
+      myfile << round(q_right_leg(i)/PI*180) << ", ";
+  }
+  myfile << round(q_right_leg(q_right_leg.size()-1)/PI*180) << "]" << endl;
+  
+  myfile << "   left_leg  : [";
+  for (int i=0; i<q_left_leg.size()-1; i++) {
+      myfile << round(q_left_leg(i)/PI*180) << ", ";
+  }
+  myfile << round(q_left_leg(q_left_leg.size()-1)/PI*180) << "]" << endl;
+  
+  myfile << "   head      : [";
+  for (int i=0; i<q_head.size()-1; i++) {
+      myfile << round(q_head(i)/PI*180) << ", ";
+  }
+  myfile << round(q_head(q_head.size()-1)/PI*180) << "]" << endl;
+  
+  myfile << "   torso     : [";
+  for (int i=0; i<q_torso.size()-1; i++) {
+      myfile << round(q_torso(i)/PI*180) << ", ";
+  }
+  myfile << round(q_torso(q_torso.size()-1)/PI*180) << "]" << endl << endl;
+  
+  myfile.close();
+  
+  return true;
+}
+
+
+void drc_poses_thread::updateCommandList()
+{
+  commands.clear();
+  for(auto item:poses) commands.push_back(item.first);
+  for(auto item:posesVector) commands.push_back(item.name); 
+  for(auto item:allPoseSeries) commands.push_back(item.name); 
+}
+
+
+
