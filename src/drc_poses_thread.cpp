@@ -59,8 +59,10 @@ bool drc_poses_thread::move_hands(double left_fraction, double right_fraction)
    return false;
 }
 
-double left_offset[7] = {-0.001878101, -0.087266425, -0.00541460025, -0.04116454775, -0.0270602895, 0.05685963075, 0.05985226625};
-double right_offset[7] = {0.00496249625, 0.01221735225, 0.023223271, -0.01633125525, -0.04591635675, 0.0131223505, -0.0860596935};
+// double left_offset[7] = {-0.001878101, -0.087266425, -0.00541460025, -0.04116454775, -0.0270602895, 0.05685963075, 0.05985226625};
+// double right_offset[7] = {0.00496249625, 0.01221735225, 0.023223271, -0.01633125525, -0.04591635675, 0.0131223505, -0.0860596935};
+double left_offset[7] = {0, 0, 0, 0, 0, 0, 0};
+double right_offset[7] = {0, 0, 0, 0, 0, 0, 0};
 yarp::sig::Vector left_arm_offset(7,left_offset);
 yarp::sig::Vector right_arm_offset(7,right_offset);
 
