@@ -184,6 +184,14 @@ poses:
    head      : [-30, 31]
    torso     : [-0, 0, -0]   
    
+ - pose_name : kit_homing
+   right_arm : [29, -15,  0, -57,   0,  0, 0]
+   left_arm  : [29,  15,  0, -57,   0,  0, 0]
+   right_leg : [ 3,   0, -29, 57, -26, -3]
+   left_leg  : [-3,   0, -29, 57, -26,  3]
+   head      : [0,   36]
+   torso     : [ 0,   6, 0]   
+   
 series:
  - series_name : letterSeries
    poses       : [letter1, letter2, letter3, letter4, rhand50, letter5, letter6, letter7, letter8]
