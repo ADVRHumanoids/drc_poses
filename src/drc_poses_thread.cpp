@@ -292,7 +292,7 @@ yarp::sig::Vector drc_poses_thread::joint_sense()
 {
     yarp::sig::Vector out(kinematic_joints);
     
-    yarp::sig::Vector in = robot.sensePosition(); //REAL_ROBOT
+    yarp::sig::Vector in = robot.senseMotorPosition(); //REAL_ROBOT
 //     yarp::sig::Vector in = robot.sensePosition(); //SIMULATION
 
     for(int i=0;i<out.size();i++) out[i]=in[i];
